@@ -1,0 +1,26 @@
+:root {
+    --background-1: #0C1C27;
+    --background-2: #B83D49;
+    --background-3: #2D3047;
+    --text-light: #DEEFF8;
+    --text-dark: #150E1B;
+    --emph: #FF9B54;
+    --button-1: #0197F6;
+    --button-1-hover: #51B6F5;
+    --button-2: #80DBEF;
+    --button-2-hover: #B5E2ED;
+}
+
+html, body {
+    margin: 0;
+    background: var(--background-1);
+}
+
+* {
+    font-family: 'Sarabun';
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}

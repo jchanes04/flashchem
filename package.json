@@ -11,14 +11,22 @@
   "devDependencies": {
     "@sveltejs/adapter-node": "^1.0.0-next.55",
     "@sveltejs/kit": "next",
+    "@types/jsonwebtoken": "^8.5.5",
+    "sass": "^1.43.4",
     "svelte": "^3.42.6",
     "svelte-check": "^2.2.6",
     "svelte-preprocess": "^4.9.4",
+    "svelte-select": "^4.4.3",
     "tslib": "^2.3.1",
     "typescript": "^4.4.3"
   },
   "type": "module",
   "dependencies": {
-    "googleapis": "^89.0.0"
+    "base64url": "^3.0.1",
+    "googleapis": "^89.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^4.1.3",
+    "svelte-forms": "^1.1.51",
+    "yup": "^0.32.11"
   }
 }

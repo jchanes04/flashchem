@@ -5,3 +5,5 @@ node_modules
 /package
 localhost-key.pem
 localhost.pem
+jwt.key
+jwt.key.pub
