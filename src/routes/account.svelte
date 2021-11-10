@@ -20,10 +20,10 @@
         width: 1000px;
         max-width: 80vw;
         grid-template-columns: min(300px, 30vw) auto;
-        grid-template-rows: min(300px, 30vw) auto;
+        grid-template-rows: auto auto;
         grid-template-areas:
             "pfp info"
-            "scoreboard info";
+            "scoreboard scoreboard";
         gap: 40px;
         margin: auto;
         margin-top: 50px;

@@ -1,4 +1,9 @@
-import {Collection, Db, MongoClient} from 'mongodb'
+import {Collection, Db, MongoClient, Document} from 'mongodb'
+
+export type UserBase = {
+    username: string,
+    userId: string
+}
 
 let client = new MongoClient("DATABASE_URL")
 let db: Db;
@@ -7,6 +12,7 @@ export async function init() {
     try {
         console.log("Connecting...")
         await client.connect()
+        console.log("Connected")
         db = client.db("flashchem")
         userData = db.collection("userData")
         return true
@@ -20,18 +26,32 @@ export async function init() {
 }
 
 function queryWrapper<X extends any[], R>(func: (...args: X) => R): (...args: X) => R {
-    if (db) {
-        return func
-    } else {
-        console.log("Database disconnected")
-        return () => null
+    return (...args: X) => {
+        if (db) {
+            return func(...args)
+        } else {
+            console.log("Database disconnected")
+            return null
+        }
     }
 }
 
 export const getUserData = queryWrapper(async (userId: string) => {
-    return userData.findOne({ userId })
+    return remove_id(userData.findOne({ userId })) as Promise<UserBase>
 })
 
 export const usernameTaken = queryWrapper(async (username: string) => {
-    return !!userData.findOne({ username })
+    return !!(await userData.findOne({ username }))
 })
+
+export const addNewUser = queryWrapper(async (user: UserBase) => {
+    return userData.insertOne(user)
+})
+
+async function remove_id(document: Document | Promise<Document>) {
+    let resolved = await document
+    if (!resolved) return null
+
+    delete resolved._id
+    return resolved
+}

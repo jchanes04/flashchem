@@ -1,10 +1,9 @@
 <script lang="ts">
     export let userData; 
-
 </script>
 
 <div class="info">
-    <h1>{userData.username}</h1>
+    <h1>{userData?.username}</h1>
 </div>
 
 <style lang="scss">

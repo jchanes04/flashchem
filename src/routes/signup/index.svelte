@@ -1,10 +1,13 @@
 <script lang="ts">
+import { page } from "$app/stores";
+
     import SignupForm from "$lib/components/SignupForm.svelte";
+    import { onMount } from "svelte";
 </script>
 
 <main>
     <h1>Account Information</h1>
-    <SignupForm />
+    <SignupForm hash={$page.query.get('hash')} />
 </main>
 
 <style lang="scss">

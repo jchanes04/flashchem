@@ -13,7 +13,7 @@ export async function get({ query }: Request) {
             method: "GET"
         })
 
-        let userData = getUserData(profileData.id)
+        let userData = await getUserData(profileData.id)
 
         if (userData) {
             let token = generateToken(profileData.id)
@@ -27,7 +27,6 @@ export async function get({ query }: Request) {
             }
         } else {
             let hash = generateSignupHash(profileData.id)
-            console.log(hash)
 
             return {
                 status: 302,

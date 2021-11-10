@@ -28,16 +28,12 @@ export function generateToken(userId: string, time: string | number = '6h') {
     return jwt.sign({ userId }, privateKey, { algorithm: 'RS256', expiresIn: time })
 }
 
-export function getUserFromToken(token: string) {
+export async function getUserFromToken(token: string) {
     try {
         let tokenPayload = <jwt.JwtPayload>jwt.verify(token, privateKey, { algorithms: [ 'RS256' ] })
-        let userData = getUserData(tokenPayload.userId)
-        return {
-            ...userData,
-            userId: tokenPayload.userId
-        } || null
-    } catch {
-        console.log('error')
+        let userData = await getUserData(tokenPayload.userId)
+        return userData || null
+    } catch (e) {
         return null
     }
 }
