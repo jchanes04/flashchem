@@ -1,6 +1,22 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
+import { session } from '$app/stores';
 
+    let accountMenuOpen = false
+    let accountWrapperElement: HTMLElement
+
+    function windowClickHandler(e: MouseEvent) {
+        if (!accountWrapperElement.contains(e.target as Node)) {
+            accountMenuOpen = false
+        }
+    }
+
+    function logout() {
+        goto('/logout')
+    }
 </script>
+
+<svelte:window on:click={windowClickHandler}></svelte:window>
 
 <div class="navbar">
     <div class="logo">
@@ -11,7 +27,19 @@
         <a href="/">Home</a>
         <a href="/practice">Practice</a>
         <a href="/about">About</a>
-        <a href="/account">Account</a>
+        <a href="/account" style="padding-right: 0">Account</a>
+        <div class="account-wrapper" bind:this={accountWrapperElement}>
+            <div class="arrow-wrapper" on:click={() => accountMenuOpen = !accountMenuOpen}>
+                <span class="menu-arrow"></span>
+            </div>
+            <div class="account-menu" class:visible={accountMenuOpen}>
+                {#if $session.loggedIn}
+                    <a href="/" on:click={logout}>Logout</a>
+                {:else}
+                    <a href="/auth/google">Login</a>
+                {/if}
+            </div>
+        </div>
     </nav>
 </div>
 
@@ -42,6 +70,44 @@
         border-radius: 50%;
         background: #C4C4C4;
         display: inline-block;
+    }
+
+    .arrow-wrapper {
+        display: inline-grid;
+        cursor: pointer;
+        padding: 0.75em 0.5em 0.75em 0;
+        place-content: center;
+
+        &:hover {
+            .menu-arrow {
+                background: var(--emph);
+            }
+        }
+    }
+
+    .menu-arrow {
+        display: inline-block;
+        vertical-align: baseline;
+        width: 1em;
+        height: 1em;
+        background: var(--text-dark);
+        clip-path: polygon(0 50%, 50% 85%, 100% 50%, 88.25% 32.2%, 50% 60%, 11.75% 32.2%);
+    }
+
+    .account-menu {
+        position: absolute;
+        top: calc(1em + 40px);
+        right: 0em;
+        background: var(--background-2);
+        padding: 0.5em;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity linear 0.1s;
+
+        &.visible {
+            opacity: 1;
+            visibility: visible;
+        }
     }
 
     h1 {
