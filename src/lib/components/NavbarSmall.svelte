@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-import { session } from '$app/stores';
+    import { session } from '$app/stores';
 
     let accountMenuOpen = false
     let accountWrapperElement: HTMLElement
