@@ -67,8 +67,8 @@
     .logo-image {
         width: 40px;
         height: 40px;
-        border-radius: 50%;
-        background: #C4C4C4;
+        background-image: url('/flashchem.png');
+        background-size: cover;
         display: inline-block;
     }
 

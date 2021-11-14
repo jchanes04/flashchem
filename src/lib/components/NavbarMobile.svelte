@@ -60,7 +60,16 @@
         gap: 10px;
     }
 
-    .logo-image, .icon {
+    .logo-image {
+        width: 40px;
+        height: 40px;
+        background-image: url('/flashchem.png');
+        background-size: cover;
+        display: inline-block;
+    }
+
+    .icon {
+        cursor: pointer;
         width: 40px;
         height: 40px;
         border-radius: 50%;

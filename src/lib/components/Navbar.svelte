@@ -62,16 +62,21 @@
         gap: 20px;
     }
 
-    .logo-image, .icon {
+    .logo-image {
         width: 50px;
         height: 50px;
-        border-radius: 50%;
-        background: #C4C4C4;
+        background-image: url('/flashchem.png');
+        background-size: cover;
         display: inline-block;
     }
 
     .icon {
         cursor: pointer;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #C4C4C4;
+        display: inline-block;
     }
 
     .account-wrapper {
