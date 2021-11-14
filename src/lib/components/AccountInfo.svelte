@@ -1,10 +1,9 @@
 <script lang="ts">
     export let userData; 
-
 </script>
 
 <div class="info">
-    <h1>{userData.username}</h1>
+    <h1>{userData?.username}</h1>
 </div>
 
 <style lang="scss">
@@ -17,8 +16,15 @@
     }
 
     h1 {
-        font-size: 40px;
+        font-size: 32px;
         margin-left: 1.5em;
         color: var(--text-light);
+    }
+
+    @media (max-width: 900px) {
+        h1 {
+            font-size: 24px;
+            margin: 0.75em;
+        }
     }
 </style>

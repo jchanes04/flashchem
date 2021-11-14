@@ -1,5 +1,6 @@
 <script lang="ts">
 import Navbar from '$lib/components/Navbar.svelte';
+import NavbarMobile from '$lib/components/NavbarMobile.svelte';
 
     import NavbarSmall from '$lib/components/NavbarSmall.svelte'
 
@@ -13,7 +14,7 @@ import Navbar from '$lib/components/Navbar.svelte';
 {:else if windowWidth > 650}
     <NavbarSmall />
 {:else}
-    <div></div>
+    <NavbarMobile />
 {/if}
 <div class="spacer"></div>
 <slot></slot>

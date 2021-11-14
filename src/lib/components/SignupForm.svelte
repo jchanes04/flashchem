@@ -1,7 +1,8 @@
 <script lang="ts">
-import { afterUpdate, onMount } from 'svelte';
+    export let hash: string
 
-    import { form as customForm, bindClass } from 'svelte-forms'
+    import { afterUpdate, onMount } from 'svelte';
+    import { form as customForm } from 'svelte-forms'
 
     let username = ""
     let purpose = "N/A"
@@ -10,14 +11,22 @@ import { afterUpdate, onMount } from 'svelte';
         credentials: 'include'
     })
     .then(d => d.json())
-    .then(d => ({
-        name: "usernameIsNotTaken",
-        valid: !d.taken
-    }))
+    .then(d => {
+        console.log(d);
+        return {
+            name: "usernameIsNotTaken",
+            valid: !d.taken
+        }
+    })
 
-    let myForm
+    $: {
+        checked = !!$signupForm?.fields.username
+    }
+
+    let checked = false
+    let signupForm: customForm
     onMount(() => {
-        myForm = customForm(
+        signupForm = customForm(
             () => ({
                 username: {
                     value: username,
@@ -25,52 +34,73 @@ import { afterUpdate, onMount } from 'svelte';
                 },
                 purpose: {
                     value: purpose,
+                    enabled: false
                 }
             }),
             {
-                validateOnChange: false,
-                initCheck: true
+                validateOnChange: false
             }
         )
-        console.log(purpose)
     })
 
     afterUpdate(() => {
-        myForm.validate()
+        if (!checked) signupForm.validate()
     })
 </script>
 
-<form method="POST" action="/signup">
+<form method="POST" action="/signup" autocomplete="off" on:input={() => checked = false}>
     <div class="field text">
         <label for="username-input">Username</label>
         <input id="username-input" type="text" name="username" bind:value={username} />
     </div>
     <div class="field radio" id="radio">
         <h4>Why have you decided to use FlashChem?</h4>
-        <input type="radio" name="purpose" bind:group={purpose} style="display: none;" checked />
-        <label for="high-school-class-input" on:click={() => {console.log('click')}}>
-            <input id="high-school-class-input" type="radio" name="purpose" bind:group={purpose} />
+        <input type="hidden" name="hash" value={hash} />
+        <input type="radio" name="purpose" value="N/A" bind:group={purpose} style="display: none;" checked />
+        <label for="high-school-class-input">
+            <input id="high-school-class-input" type="radio" name="purpose" value="high-school" bind:group={purpose} />
             <span />
             To study for a High School level class
         </label>
         <label for="college-level-class-input">
-            <input id="college-level-class-input" type="radio" name="purpose" bind:group={purpose} />
+            <input id="college-level-class-input" type="radio" name="purpose" value="college" bind:group={purpose} />
             <span />
             To study for a College level class
         </label>
         <label for="competition-input">
-            <input id="competition-input" type="radio" name="purpose" bind:group={purpose} />
+            <input id="competition-input" type="radio" name="purpose" value="competition" bind:group={purpose} />
             <span />
             To study for a competition like USNCO
         </label>
         <label for="personal-input">
-            <input id="personal-input" type="radio" name="purpose" bind:group={purpose} />
+            <input id="personal-input" type="radio" name="purpose" value="personal" bind:group={purpose} />
             <span />
             To study for myself or for another purpose
         </label>
     </div>
+    <div class="errors">
+        {#if $signupForm?.fields.username.errors.includes('required')}
+            <p>A username is required</p>
+        {/if}
+
+        {#if $signupForm?.fields.username.errors.includes('min')}
+            <p>Usernames must be a minimum of 6 characters</p>
+        {/if}
+
+        {#if $signupForm?.fields.username.errors.includes('max')}
+            <p>Usernames must be at most 30 characters</p>
+        {/if}
+
+        {#if $signupForm?.fields.username.pending}
+            <p>Checking username availability...</p>
+        {/if}
+
+        {#if $signupForm?.fields.username.errors.includes('usernameIsNotTaken')}
+            <p>That username is already taken</p>
+        {/if}
+    </div>
     <div class="button">
-        <button on:click|preventDefault={() => myForm.validate()}>
+        <button disabled={!$signupForm?.valid}>
             Create Account
         </button>
     </div>
@@ -150,6 +180,12 @@ import { afterUpdate, onMount } from 'svelte';
         }
     }
 
+    .errors {
+        margin-top: 1.5em;
+        text-align: right;
+        color: var(--background-2);
+    }
+
     .button {
         width: 100%;
         text-align: right;
@@ -165,6 +201,19 @@ import { afterUpdate, onMount } from 'svelte';
         outline: none;
         padding: 0.5em;
         display: inline-block;
-        margin-top: 1.5em;
+        transition: background-color ease-in-out 0.15s;
+        cursor: pointer;
+
+        &:hover {
+            background-color: var(--button-1-hover);
+        }
+
+        &:disabled {
+            cursor: default;
+
+            &:hover {
+                background-color: var(--button-1);
+            }
+        }
     }
 </style>

@@ -1,6 +1,22 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
+    import { session } from '$app/stores';
 
+    let accountMenuOpen = false
+    let accountWrapperElement: HTMLElement
+
+    function windowClickHandler(e: MouseEvent) {
+        if (!accountWrapperElement.contains(e.target as Node)) {
+            accountMenuOpen = false
+        }
+    }
+
+    function logout() {
+        goto('/logout')
+    }
 </script>
+
+<svelte:window on:click={windowClickHandler}></svelte:window>
 
 <div class="navbar">
     <div class="logo">
@@ -13,7 +29,16 @@
         <a href="/about">About</a>
         <a href="/account">Account</a>
     </nav>
-    <div class="icon"></div>
+    {#if $session.loggedIn}
+        <div class="account-wrapper" bind:this={accountWrapperElement}>
+            <div class="icon" on:click={() => accountMenuOpen = !accountMenuOpen}></div>
+            <div class="account-menu" class:visible={accountMenuOpen}>
+                <a href="/" on:click={logout}>Logout</a>
+            </div>
+        </div>
+    {:else}
+        <a href="/auth/google">Login</a>
+    {/if}
 </div>
 
 <style lang="scss">
@@ -45,6 +70,30 @@
         display: inline-block;
     }
 
+    .icon {
+        cursor: pointer;
+    }
+
+    .account-wrapper {
+        position: relative;
+    }
+
+    .account-menu {
+        position: absolute;
+        top: calc(1em + 50px);
+        right: 0em;
+        background: var(--background-2);
+        padding: 0.5em;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity linear 0.1s;
+
+        &.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
     h1 {
         display: inline-block;
         font-size: 40px;
@@ -62,15 +111,16 @@
         flex-direction: row;
         align-items: center;
         gap: 10px;
+    }
 
-        a {
-            font-size: 28px;
-            font-weight: 500;
-            padding: 0.5em 0.3em;
+    a {
+        font-size: 28px;
+        font-weight: 500;
+        padding: 0.5em 0.3em;
+        transition: color 0.1s linear;
 
-            &:hover {
-                color: var(--emph);
-            }
+        &:hover {
+            color: var(--emph);
         }
     }
 </style>

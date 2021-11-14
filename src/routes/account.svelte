@@ -20,10 +20,10 @@
         width: 1000px;
         max-width: 80vw;
         grid-template-columns: min(300px, 30vw) auto;
-        grid-template-rows: min(300px, 30vw) auto;
+        grid-template-rows: auto auto;
         grid-template-areas:
             "pfp info"
-            "scoreboard info";
+            "scoreboard scoreboard";
         gap: 40px;
         margin: auto;
         margin-top: 50px;
@@ -47,5 +47,26 @@
         grid-area: scoreboard;
     }
 
-    
+    @media (max-width: 900px) {
+        main {
+            gap: 20px;
+            max-width: min(90vw, 720px);
+        }
+    }
+
+    @media (max-width: 650px) {
+        main {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto auto;
+            grid-template-areas: 
+                "pfp"
+                "info"
+                "scoreboard";
+        }
+
+        .pfp {
+            width: min(250px, 60vw);
+            height: min(250px, 60vw);
+        }
+    }
 </style>
