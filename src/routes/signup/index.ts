@@ -1,4 +1,4 @@
-import createNewUser from "$lib/functions/createNewUser";
+import createNewUser from "$lib/functions/server/createNewUser";
 import type { Request } from "@sveltejs/kit";
 import type { ReadOnlyFormData } from "@sveltejs/kit/types/helper";
 import { addNewUser } from "../../mongo";
