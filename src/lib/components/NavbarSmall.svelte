@@ -6,7 +6,7 @@
     let accountWrapperElement: HTMLElement
 
     function windowClickHandler(e: MouseEvent) {
-        if (!accountWrapperElement.contains(e.target as Node)) {
+        if (accountWrapperElement && !accountWrapperElement.contains(e.target as Node)) {
             accountMenuOpen = false
         }
     }
