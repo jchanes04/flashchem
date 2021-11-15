@@ -8,6 +8,7 @@ export type UserBase = {
 let client = new MongoClient("DATABASE_URL")
 let db: Db;
 let userData: Collection;
+let practiceSets: Collection;
 export async function init() {
     try {
         console.log("Connecting...")
@@ -15,6 +16,7 @@ export async function init() {
         console.log("Connected")
         db = client.db("flashchem")
         userData = db.collection("userData")
+        practiceSets = db.collection("practiceSets")
         return true
     } catch (e) {
         console.log(e)
