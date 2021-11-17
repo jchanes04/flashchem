@@ -4,6 +4,7 @@
     import Slider from 'svelte-range-slider-pips'
     import loadSets from '$lib/functions/client/loadSets';
     import type { PracticeMode, SetInfo } from '$lib/client';
+    import { timeFormatter } from './PracticeOptions';
 
     const groupBy = item => item.difficulty
     function handleSelect(e) {
@@ -26,31 +27,42 @@
     let setName = undefined
     let selectedSet: SetInfo = undefined
 
-    let practiceMode: PracticeMode = undefined
+    let practiceMode: PracticeMode = "timed"
+    let lengthMode: "timed" | "fixed-questions" = "timed"
+    function setLengthMode(practiceMode: PracticeMode) {
+        if (practiceMode === "timed" || practiceMode === "fixed-questions")
+            lengthMode = practiceMode
+    }
+    $: setLengthMode(practiceMode)
+
+    let practiceTime = 2
+    let practiceQuestions = 25
 </script>
 
 <div id="practice-options">
     <h1>Practice Options</h1>
     <div class="setting">
         <h2>Practice Set</h2>
-        <div class="set-select-wrapper" class:hidden={searching}>
-            <Select items={[...setsList(), {
-                type: 'other',
-                name: 'Search for more sets',
-                id: 'search'
-            }]} {groupBy} optionIdentifier="id" showChevron={true}
-            on:select={handleSelect} on:clear={handleClear} />
+        <div class="select-wrapper">
+            <div class="set-select-wrapper" class:hidden={searching}>
+                <Select items={[...setsList(), {
+                    type: 'other',
+                    name: 'Search for more sets',
+                    id: 'search'
+                }]} {groupBy} optionIdentifier="id" labelIdentifier="name" showChevron={true}
+                on:select={handleSelect} on:clear={handleClear} />
+            </div>
+            {#if searching}
+                <Select placeholder="Search for sets" optionIdentifier="id" 
+                    on:select={handleSelect} on:clear={handleClear}
+                    loadOptions={loadSets} {getSelectionLabel} {getOptionLabel} />
+            {/if}
         </div>
-        {#if searching}
-            <Select placeholder="Search for sets" optionIdentifier="id" 
-                on:select={handleSelect} on:clear={handleClear}
-                loadOptions={loadSets} {getSelectionLabel} {getOptionLabel} />
-        {/if}
     </div>
     <div class="setting">
         <h2>Mode</h2>
         <label for="timed-input">
-            <input id="timed-input" type="radio" name="practice-mode" value="timed" bind:group={practiceMode} />
+            <input id="timed-input" type="radio" name="practice-mode" value="timed" bind:group={practiceMode} checked />
             <span />
             Timed
         </label>
@@ -72,7 +84,13 @@
     </div>
     <div class="setting" class:grayed={practiceMode === "infinite" || practiceMode === "streak"}>
         <h2>Length</h2>
-        <Slider />
+        <div class="slider">
+            {#if lengthMode === "timed"}
+                <Slider values={[2]} min={1} max={6} pips all="label" springValues={{ stiffness: 0.12, damping: 0.55 }} formatter={timeFormatter} />
+            {:else if lengthMode === "fixed-questions"}
+                <Slider values={[25]} min={5} max={50} pips step={5} all="label" springValues={{ stiffness: 0.12, damping: 0.55 }} />
+            {/if}
+        </div>
     </div>
 </div>
 
@@ -81,6 +99,26 @@
         background: var(--background-3);
         border-radius: 15px;
         padding: 1.5em;
+        color: var(--text-light);
+        width: min(700px, 80vw);
+    }
+
+    h1 {
+        font-size: 32px;
+        text-align: center;
+    }
+
+    h2 {
+        font-size: 24px;
+        font-weight: 500;
+        margin-left: 1.5em;
+        margin-bottom: 0.25em;
+        text-decoration: underline;
+    }
+
+    .select-wrapper {
+        width: min(90%, 45ch);
+        font-size: 18px;
     }
 
     label {
@@ -124,5 +162,12 @@
         input:checked ~ span::after {
             display: inline-block;
         }
+    }
+
+    .grayed {
+        opacity: 0.5;
+        filter: blur(0.6px);
+        pointer-events: none;
+        user-select: none;
     }
 </style>

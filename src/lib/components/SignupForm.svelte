@@ -54,7 +54,7 @@
         <input id="username-input" type="text" name="username" bind:value={username} />
     </div>
     <div class="field radio" id="radio">
-        <h4>Why have you decided to use FlashChem?</h4>
+        <h2>Why have you decided to use FlashChem?</h2>
         <input type="hidden" name="hash" value={hash} />
         <input type="radio" name="purpose" value="N/A" bind:group={purpose} style="display: none;" checked />
         <label for="high-school-class-input">
@@ -129,7 +129,7 @@
     }
 
     #radio {
-        h4 {
+        h2 {
             font-size: 18px;
             font-weight: 300;
             margin-left: 1.5em;

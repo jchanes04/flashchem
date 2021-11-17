@@ -6,7 +6,7 @@ export type Topic =
     "chemical formulas"
 
 export type Type = "list" | "name" | "place" | "compare"
-export type PracticeMode = "timed" | "questions" | "streak" | "infinite"
+export type PracticeMode = "timed" | "fixed-questions" | "streak" | "infinite"
 
 export type SetInfo = {
     difficulty: Difficulty,
