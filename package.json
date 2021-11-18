@@ -13,7 +13,7 @@
     "@sveltejs/kit": "next",
     "@types/jsonwebtoken": "^8.5.5",
     "sass": "^1.43.4",
-    "svelte": "^3.42.6",
+    "svelte": "^3.44.1",
     "svelte-check": "^2.2.6",
     "svelte-preprocess": "^4.9.4",
     "svelte-range-slider-pips": "^2.0.0",

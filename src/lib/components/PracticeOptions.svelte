@@ -5,6 +5,7 @@
     import loadSets from '$lib/functions/client/loadSets';
     import type { PracticeMode, SetInfo } from '$lib/client';
     import { timeFormatter } from './PracticeOptions';
+import { session } from '$app/stores';
 
     const groupBy = item => item.difficulty
     function handleSelect(e) {
@@ -37,6 +38,8 @@
 
     let practiceTime = 2
     let practiceQuestions = 25
+
+    let postScore = false
 </script>
 
 <div id="practice-options">
@@ -92,6 +95,15 @@
             {/if}
         </div>
     </div>
+    {#if $session.loggedIn}
+        <div class="setting">
+            <label for="post-score-input">
+                <input type="checkbox" name="post-score" bind:checked={postScore} />
+                <span />
+                Post my score to the leaderboards
+            </label>
+        </div>
+    {/if}
 </div>
 
 <style lang="scss">
