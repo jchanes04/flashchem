@@ -1,12 +1,20 @@
 const times = [
-    "45 s",
-    "90 s",
-    "135 s",
-    "180 s",
-    "240 s",
-    "300 s"
+    45,
+    90,
+    135,
+    180,
+    240,
+    300,
 ]
 
-export const timeFormatter = (v: number, i: number, p: number) => {
+export function indexToTime(i: number) {
     return times[i]
+}
+
+export const timeFormatter = (v: number) => {
+    return times[v]
+}
+
+export const timeHandleFormatter = (v: number) => {
+    return `${times[v]} seconds`
 }

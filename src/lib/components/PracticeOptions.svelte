@@ -4,29 +4,36 @@
     import Slider from 'svelte-range-slider-pips'
     import loadSets from '$lib/functions/client/loadSets';
     import type { PracticeMode, SetInfo } from '$lib/client';
-    import { timeFormatter } from './PracticeOptions';
-import { session } from '$app/stores';
+    import { timeFormatter, timeHandleFormatter } from './PracticeOptions';
+    import { session } from '$app/stores';
+    import { createEventDispatcher, tick } from 'svelte';
 
     const groupBy = item => item.difficulty
-    function handleSelect(e) {
-        if (e.detail === 'search') {
+    async function handleSelect(e) {
+        if (e.detail.id === 'search') {
+            selectedSet = undefined
+            await tick();
             searching = true
-            setName = undefined
         } else {
-            setName = e.detail
+            selectedSet = e.detail
+            await tick()
+            searching = false
         }
     }
     function handleClear() {
         searching = false
-        setName = undefined
         selectedSet = undefined
     }
     const getOptionLabel = (option) => option.name;
     const getSelectionLabel = (option) => option.name;
+    function handleSearchSelect(e) {
+        selectedSet = e.detail
+        setSelectValue = undefined
+    }
 
     let searching = false
-    let setName = undefined
     let selectedSet: SetInfo = undefined
+    let setSelectValue = undefined
 
     let practiceMode: PracticeMode = "timed"
     let lengthMode: "timed" | "fixed-questions" = "timed"
@@ -39,7 +46,18 @@ import { session } from '$app/stores';
     let practiceTime = 2
     let practiceQuestions = 25
 
-    let postScore = false
+    function handleTimeChange(e: CustomEvent) {
+        let { value } = e.detail
+        practiceTime = value
+    }
+
+    let postScore = true
+
+    $: startDisabled = !(selectedSet && practiceMode && (practiceTime || practiceQuestions))
+    const dispatch = createEventDispatcher()
+    function startPractice() {
+        dispatch('start')
+    }
 </script>
 
 <div id="practice-options">
@@ -53,33 +71,33 @@ import { session } from '$app/stores';
                     name: 'Search for more sets',
                     id: 'search'
                 }]} {groupBy} optionIdentifier="id" labelIdentifier="name" showChevron={true}
-                on:select={handleSelect} on:clear={handleClear} />
+                on:select={handleSelect} on:clear={handleClear} bind:value={setSelectValue} />
             </div>
             {#if searching}
-                <Select placeholder="Search for sets" optionIdentifier="id" 
-                    on:select={handleSelect} on:clear={handleClear}
+                <Select placeholder="Search for sets" optionIdentifier="id"
+                    on:select={handleSearchSelect} on:clear={handleClear}
                     loadOptions={loadSets} {getSelectionLabel} {getOptionLabel} />
             {/if}
         </div>
     </div>
     <div class="setting">
         <h2>Mode</h2>
-        <label for="timed-input">
+        <label class="radio" for="timed-input">
             <input id="timed-input" type="radio" name="practice-mode" value="timed" bind:group={practiceMode} checked />
             <span />
             Timed
         </label>
-        <label for="fixed-questions-input">
+        <label class="radio" for="fixed-questions-input">
             <input id="fixed-questions-input" type="radio" name="practice-mode" value="fixed-questions" bind:group={practiceMode} />
             <span />
             Fixed questions
         </label>
-        <label for="streak-input">
+        <label class="radio" for="streak-input">
             <input id="streak-input" type="radio" name="practice-mode" value="streak" bind:group={practiceMode} />
             <span />
             Streak
         </label>
-        <label for="infinite-input">
+        <label class="radio" for="infinite-input">
             <input id="infinite-input" type="radio" name="practice-mode" value="infinite" bind:group={practiceMode} />
             <span />
             Infinite
@@ -89,21 +107,28 @@ import { session } from '$app/stores';
         <h2>Length</h2>
         <div class="slider">
             {#if lengthMode === "timed"}
-                <Slider values={[2]} min={1} max={6} pips all="label" springValues={{ stiffness: 0.12, damping: 0.55 }} formatter={timeFormatter} />
+                <Slider values={[practiceTime]} min={0} max={5} pips all="label" float
+                    formatter={timeFormatter} handleFormatter={timeHandleFormatter}
+                    springValues={{ stiffness: 0.12, damping: 0.55 }}
+                    on:change={handleTimeChange} />
             {:else if lengthMode === "fixed-questions"}
-                <Slider values={[25]} min={5} max={50} pips step={5} all="label" springValues={{ stiffness: 0.12, damping: 0.55 }} />
+                <Slider values={[practiceQuestions]} min={5} max={50} pips step={5} all="label" springValues={{ stiffness: 0.12, damping: 0.55 }} />
             {/if}
         </div>
     </div>
     {#if $session.loggedIn}
         <div class="setting">
-            <label for="post-score-input">
-                <input type="checkbox" name="post-score" bind:checked={postScore} />
+            <h2>Other</h2>
+            <label class="checkbox" for="post-score-input">
+                <input id="post-score-input" type="checkbox" name="post-score" bind:checked={postScore} />
                 <span />
                 Post my score to the leaderboards
             </label>
         </div>
     {/if}
+    <div class="button-wrapper">
+        <button disabled={startDisabled} on:click={startPractice}>Start Practice</button>
+    </div>
 </div>
 
 <style lang="scss">
@@ -113,24 +138,42 @@ import { session } from '$app/stores';
         padding: 1.5em;
         color: var(--text-light);
         width: min(700px, 80vw);
+        max-height: calc(90vh - 60px);
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     h1 {
-        font-size: 32px;
+        font-size: 36px;
         text-align: center;
     }
 
     h2 {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 500;
         margin-left: 1.5em;
         margin-bottom: 0.25em;
+        margin-top: 1em;
         text-decoration: underline;
     }
 
     .select-wrapper {
         width: min(90%, 45ch);
         font-size: 18px;
+        margin-top: 0.75em;
+
+        --background: var(--background-1);
+        --border: none;
+        --listBackground: var(--background-1);
+        --itemIsActiveBG: var(--button-1);
+        --itemHoverBG: var(--button-1-hover);
+        --itemHoverColor: var(--text-dark);
+        --inputColor: var(--text-light);
+    }
+
+    .hidden {
+        position: absolute;
+        visibility: none;
     }
 
     label {
@@ -176,10 +219,92 @@ import { session } from '$app/stores';
         }
     }
 
+    label.radio span {
+        border-radius: 50%;
+
+        &::after {
+            border-radius: 0.3em;
+        }
+    }
+
+    label.checkbox span {
+        border-radius: 25%;
+
+        &::after {
+            border-radius: 0.15em;
+        }  
+    }
+
+    .slider {
+        margin: 2em 2em 0em;
+
+        --range-slider: var(--background-1);
+        --range-handle: var(--background-2);
+        --range-handle-inactive: var(--range-handle);
+        --range-handle-focus: var(--range-handle);
+        --range-pip-text: var(--text-light);
+        --range-pip-active-text: var(--emph);
+        --range-pip-hover: var(--text-light);
+    }
+
+    :global(.rangePips) {
+        color: var(--text-light); 
+    }
+
     .grayed {
         opacity: 0.5;
         filter: blur(0.6px);
         pointer-events: none;
         user-select: none;
+    }
+
+    .button-wrapper {
+        margin-top: 4em;
+
+        button {
+            background: var(--button-1);
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: 600;
+            border: none;
+            padding: 0.5em 1em;
+            margin-right: 1em;
+            color: var(--text-dark);
+            cursor: pointer;
+            float: right;
+
+            &:hover {
+                background: var(--button-1-hover);
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: default;
+
+                &:hover {
+                    background: var(--button-1);
+                }
+            }
+        }
+    }
+
+    @media (max-width: 500px) {
+        .select-wrapper {
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .slider {
+            margin: 2em 0;
+        }
+
+        .button-wrapper {
+            text-align: center;
+
+            button {
+                float: none;
+                margin-right: 0;
+            }
+        }
     }
 </style>
