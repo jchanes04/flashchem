@@ -1,17 +1,28 @@
-export type Difficulty = "starter" | "basic" | "intermediate" | "advanced" | "complete"
-export type Topic = 
-    "atomic numbers" |
-    "atomic masses" |
-    "periodic table locations" |
-    "chemical formulas"
+import type { Difficulty, SetItem, Topic, Type } from "./global"
 
-export type Type = "list" | "name" | "place" | "compare"
 export type PracticeMode = "timed" | "fixed-questions" | "streak" | "infinite"
 
 export type SetInfo = {
     difficulty: Difficulty,
     topic: Topic,
-    type: Type,
+    type: SetType,
     name: string,
     id: string
+}
+
+export type PracticeOptions = {
+    selectedSet: SetInfo & { isGroupItem: boolean },
+    practiceMode: PracticeMode,
+    practiceTime?: number,
+    practiceQuestions?: number
+}
+
+export type NextQuestionResponse = {
+    selectedQuestion: SetItem,
+    resetExclude: boolean
+}
+
+export type ModeScore = {
+    number: number,
+    units: string
 }

@@ -4,7 +4,7 @@
     import Slider from 'svelte-range-slider-pips'
     import loadSets from '$lib/functions/client/loadSets';
     import type { PracticeMode, SetInfo } from '$lib/client';
-    import { timeFormatter, timeHandleFormatter } from './PracticeOptions';
+    import { indexToTime, timeFormatter, timeHandleFormatter } from './PracticeOptions';
     import { session } from '$app/stores';
     import { createEventDispatcher, tick } from 'svelte';
 
@@ -56,8 +56,15 @@
     $: startDisabled = !(selectedSet && practiceMode && (practiceTime || practiceQuestions))
     const dispatch = createEventDispatcher()
     function startPractice() {
-        dispatch('start')
+        dispatch('start', {
+            selectedSet,
+            practiceMode,
+            practiceTime: practiceMode === "timed" ? indexToTime(practiceTime) : null,
+            practiceQuestions: practiceMode === "fixed-questions" ? practiceQuestions : null
+        })
     }
+
+    $: console.log(selectedSet)
 </script>
 
 <div id="practice-options">
@@ -161,6 +168,7 @@
         width: min(90%, 45ch);
         font-size: 18px;
         margin-top: 0.75em;
+        margin-left: 0.75em;
 
         --background: var(--background-1);
         --border: none;
@@ -236,7 +244,7 @@
     }
 
     .slider {
-        margin: 2em 2em 0em;
+        margin: 2em 0.5em;
 
         --range-slider: var(--background-1);
         --range-handle: var(--background-2);
@@ -268,7 +276,7 @@
             font-weight: 600;
             border: none;
             padding: 0.5em 1em;
-            margin-right: 1em;
+            margin-right: 0.5em;
             color: var(--text-dark);
             cursor: pointer;
             float: right;

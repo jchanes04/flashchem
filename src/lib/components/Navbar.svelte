@@ -24,10 +24,10 @@
         <h1>FlashChem</h1>
     </div>
     <nav>
-        <a href="/">Home</a>
-        <a href="/practice">Practice</a>
-        <a href="/about">About</a>
-        <a href="/account">Account</a>
+        <a href="/"><div class="link-wrapper">Home</div></a>
+        <a href="/practice"><div class="link-wrapper">Practice</div></a>
+        <a href="/about"><div class="link-wrapper">About</div></a>
+        <a href="/account"><div class="link-wrapper">Account</div></a>
     </nav>
     {#if $session.loggedIn}
         <div class="account-wrapper" bind:this={accountWrapperElement}>
@@ -47,7 +47,7 @@
         height: 80px;
         box-sizing: border-box;
         width: 100%;
-        position: fixed;
+        position: sticky;
         top: 0;
         display: flex;
         flex-direction: row;
@@ -125,7 +125,25 @@
         transition: color 0.1s linear;
 
         &:hover {
-            color: var(--emph);
+            .link-wrapper::after {
+                left: 0;
+            }
+        }
+        
+        .link-wrapper {
+            overflow: hidden;
+            position: relative;
+
+            &::after {
+                content: '';
+                width: 100%;
+                height: 3px;
+                background-color: var(--text-dark);
+                position: absolute;
+                bottom: -0.05em;
+                left: -100%;
+                transition: left 0.15s ease-out;
+            };
         }
     }
 </style>

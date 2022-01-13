@@ -45,7 +45,7 @@
         height: 70px;
         box-sizing: border-box;
         width: 100%;
-        position: fixed;
+        position: sticky;
         top: 0;
         display: flex;
         flex-direction: row;

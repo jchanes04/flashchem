@@ -1,9 +1,5 @@
-import {Collection, Db, MongoClient, Document} from 'mongodb'
-
-export type UserBase = {
-    username: string,
-    userId: string
-}
+import type { PracticeSet, UserBase } from '$lib/server';
+import { Collection, Db, MongoClient, Document } from 'mongodb'
 
 let client = new MongoClient("DATABASE_URL")
 let db: Db;
@@ -50,10 +46,14 @@ export const addNewUser = queryWrapper(async (user: UserBase) => {
     return userData.insertOne(user)
 })
 
+export const getSetById = queryWrapper(async (id: string) => {
+    return remove_id(practiceSets.findOne({ id })) as Promise<PracticeSet>
+})
+
 async function remove_id(document: Document | Promise<Document>) {
     let resolved = await document
     if (!resolved) return null
 
-    delete resolved._id
-    return resolved
+    const {_id, ...output} = resolved
+    return output
 }

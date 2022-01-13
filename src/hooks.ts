@@ -3,7 +3,7 @@ import { getUserFromToken } from "./auth";
 import { init } from './mongo'
 type Resolve = (request: Request<Record<string, any>>) => Response | Promise<Response>
 
-await init()
+init()
 
 const authenticatedEndpoints = ["account"]
 
