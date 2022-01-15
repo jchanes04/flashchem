@@ -26,3 +26,9 @@ export type ModeScore = {
     number: number,
     units: string
 }
+
+export type LastQuestionData = {
+    key: string | number,
+    correctAnswer: string | number,
+    givenAnswer: string | number
+}

@@ -45,10 +45,16 @@
 
     let practiceTime = 2
     let practiceQuestions = 25
+    $: console.log(practiceQuestions)
 
     function handleTimeChange(e: CustomEvent) {
-        let { value } = e.detail
+        const { value } = e.detail
         practiceTime = value
+    }
+
+    function handleQuestionNumberChange(e: CustomEvent) {
+        const { value } = e.detail
+        practiceQuestions = value
     }
 
     let postScore = true
@@ -77,11 +83,11 @@
                     type: 'other',
                     name: 'Search for more sets',
                     id: 'search'
-                }]} {groupBy} optionIdentifier="id" labelIdentifier="name" showChevron={true}
+                }]} {groupBy} optionIdentifier="id" labelIdentifier="name" showChevron={true} placeholder="Choose a Set"
                 on:select={handleSelect} on:clear={handleClear} bind:value={setSelectValue} />
             </div>
             {#if searching}
-                <Select placeholder="Search for sets" optionIdentifier="id"
+                <Select placeholder="Search for sets" optionIdentifier="id" noOptionsMessage="No Sets Found"
                     on:select={handleSearchSelect} on:clear={handleClear}
                     loadOptions={loadSets} {getSelectionLabel} {getOptionLabel} />
             {/if}
@@ -119,7 +125,9 @@
                     springValues={{ stiffness: 0.12, damping: 0.55 }}
                     on:change={handleTimeChange} />
             {:else if lengthMode === "fixed-questions"}
-                <Slider values={[practiceQuestions]} min={5} max={50} pips step={5} all="label" springValues={{ stiffness: 0.12, damping: 0.55 }} />
+                <Slider values={[practiceQuestions]} min={5} max={50} pips step={5} all="label"
+                springValues={{ stiffness: 0.12, damping: 0.55 }}
+                on:change={handleQuestionNumberChange} />
             {/if}
         </div>
     </div>
@@ -145,7 +153,7 @@
         padding: 1.5em;
         color: var(--text-light);
         width: min(700px, 80vw);
-        max-height: calc(90vh - 60px);
+        max-height: 70vh;
         overflow-y: auto;
         overflow-x: hidden;
     }
@@ -172,11 +180,11 @@
 
         --background: var(--background-1);
         --border: none;
-        --listBackground: var(--background-1);
-        --itemIsActiveBG: var(--button-1);
-        --itemHoverBG: var(--button-1-hover);
-        --itemHoverColor: var(--text-dark);
-        --inputColor: var(--text-light);
+        --list-background: var(--background-1);
+        --item-is-active-bg: var(--button-1);
+        --item-hover-bg: var(--button-1-hover);
+        --item-hover-color: var(--text-dark);
+        --input-color: var(--text-light);
     }
 
     .hidden {
@@ -253,6 +261,8 @@
         --range-pip-text: var(--text-light);
         --range-pip-active-text: var(--emph);
         --range-pip-hover: var(--text-light);
+        --range-pip: var(--text-light);
+        --range-pip-active: var(--text-light);
     }
 
     :global(.rangePips) {
@@ -268,6 +278,7 @@
 
     .button-wrapper {
         margin-top: 4em;
+        text-align: right;
 
         button {
             background: var(--button-1);
@@ -279,7 +290,6 @@
             margin-right: 0.5em;
             color: var(--text-dark);
             cursor: pointer;
-            float: right;
 
             &:hover {
                 background: var(--button-1-hover);

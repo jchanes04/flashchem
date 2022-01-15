@@ -21,27 +21,32 @@
     import NotLoggedIn from "$lib/components/NotLoggedIn.svelte";
     import PracticeOptionMenu from "$lib/components/PracticeOptionMenu.svelte";
     import { onMount } from "svelte";
-    import type { ModeScore, NextQuestionResponse, PracticeOptions, SetInfo } from "$lib/client";
+    import type { LastQuestionData, ModeScore, NextQuestionResponse, PracticeOptions, SetInfo } from "$lib/client";
     import type { SetItem } from "$lib/global";
     import TimedPractice from "$lib/components/PracticeHandlers/TimedPractice.svelte";
     import PracticeResults from "$lib/components/PracticeResults.svelte";
     import FixedQuestionPractice from "$lib/components/PracticeHandlers/FixedQuestionPractice.svelte";
     import InfinitePractice from "$lib/components/PracticeHandlers/InfinitePractice.svelte";
     import StreakPractice from "$lib/components/PracticeHandlers/StreakPractice.svelte";
+    import type { PracticeSet } from "$lib/global";
+    import getNextQuestion from "$lib/functions/client/getNextQuestion";
 
     export let confirmed = undefined
     let practicing = false
 
-    let questionQueue: SetItem[] = null
+    let setData: PracticeSet = null
     let error: string = null
 
     let setInfo: SetInfo = null
     let options: PracticeOptions = null
 
     let exclude: number[] = []
+    let currentQuestion: SetItem = null
+
     let numberCorrect = 0
     let modeScore: ModeScore = null
     let questionNumber = 1
+    let lastQuestionData: LastQuestionData = null
 
     let timerInterval = null
 
@@ -56,59 +61,48 @@
     async function onStart(e: CustomEvent<PracticeOptions>) {
         options = e.detail
         setInfo = options.selectedSet
-        const firstQuestionRes = await fetch('https://' + $page.host + `/api/question/${options.selectedSet.id}`)
-        if (firstQuestionRes.status === 404) {
-            error = "setNotFound"
-            return
-        }
-        const firstQuestion: NextQuestionResponse = await firstQuestionRes.json()
-        const secondQuestionRes = await fetch('https://' + $page.host + `/api/question/${options.selectedSet.id}`)
-        if (firstQuestionRes.status === 404) {
-            error = "setNotFound"
-            return
-        }
-        const secondQuestion: NextQuestionResponse = await secondQuestionRes.json()
-        questionQueue = [firstQuestion.selectedQuestion, secondQuestion.selectedQuestion]
+        history.pushState({}, '', '/practice/?set=' + options.selectedSet.id)
         
-        numberCorrect = 0
-        questionNumber = 1
-        practicing = true
+        const setDataRes = await fetch('/api/set/' + options.selectedSet.id)
+        const setDataValue = await setDataRes.json()
+        
+        if (setDataValue) {
+            setData = setDataValue
+            numberCorrect = 0
+            questionNumber = 1
+
+            const { nextQuestion, newExclude } = getNextQuestion(setData.items, [])
+            currentQuestion = nextQuestion
+            exclude = newExclude
+
+            practicing = true
+        }
     }
 
     async function handleCorrect() {
         numberCorrect++
         questionNumber++
         
-        questionQueue.shift()
-        questionQueue = [...questionQueue]
-
-        const newQuestionRes = await fetch('https://' + $page.host + `/api/question/${options.selectedSet.id}?exclude=${encodeURIComponent(exclude.join(","))}`)
-        const newQuestion: NextQuestionResponse = await newQuestionRes.json()
-        if (newQuestion.resetExclude) exclude = []
-        exclude.push(newQuestion.selectedQuestion.i)
-        if (newQuestionRes.status === 200) questionQueue = [...questionQueue, newQuestion.selectedQuestion]
+        const { nextQuestion, newExclude } = getNextQuestion(setData.items, exclude)
+        exclude = newExclude
+        currentQuestion = nextQuestion
     }
 
     async function handleSkip() {
         questionNumber++
         
-        questionQueue.shift()
-        questionQueue = [...questionQueue]
-
-        const newQuestionRes = await fetch('https://' + $page.host + `/api/question/${options.selectedSet.id}?exclude=${encodeURIComponent(exclude.join(","))}`)
-        const newQuestion: NextQuestionResponse = await newQuestionRes.json()
-        if (newQuestion.resetExclude) exclude = []
-        exclude.push(newQuestion.selectedQuestion.i)
-        if (newQuestionRes.status === 200) questionQueue = [...questionQueue, newQuestion.selectedQuestion]
+        const { nextQuestion, newExclude } = getNextQuestion(setData.items, exclude)
+        exclude = newExclude
+        currentQuestion = nextQuestion
     }
 
-    function handleEnd(e?: CustomEvent<{ practiceLength?: number }>) {
+    function handleEnd(e?: CustomEvent<{ practiceLength?: number, lastQuestion?: LastQuestionData }>) {
         practicing = false
         clearInterval(timerInterval)
 
         if (options.practiceMode === "timed") {
             modeScore = {
-                number: numberCorrect / options.practiceTime,
+                number: numberCorrect / e.detail.practiceLength,
                 units: "questions / second"
             }
         } else if (options.practiceMode === "fixed-questions") {
@@ -121,23 +115,19 @@
                 number: 100 * numberCorrect / (questionNumber - 1),
                 units: "% correct"
             }
+        } else if (options.practiceMode === "streak") {
+            modeScore = {
+                number: 100 * numberCorrect / questionNumber,
+                units: "% correct"
+            }
+            lastQuestionData = e.detail.lastQuestion
         }
     }
 
     async function handlePlayAgain() {
-        const firstQuestionRes = await fetch('https://' + $page.host + `/api/question/${options.selectedSet.id}`)
-        if (firstQuestionRes.status === 404) {
-            error = "setNotFound"
-            return
-        }
-        const firstQuestion: NextQuestionResponse = await firstQuestionRes.json()
-        const secondQuestionRes = await fetch('https://' + $page.host + `/api/question/${options.selectedSet.id}`)
-        if (firstQuestionRes.status === 404) {
-            error = "setNotFound"
-            return
-        }
-        const secondQuestion: NextQuestionResponse = await secondQuestionRes.json()
-        questionQueue = [firstQuestion.selectedQuestion, secondQuestion.selectedQuestion]
+        const { nextQuestion, newExclude } = getNextQuestion(setData.items, [])
+        currentQuestion = nextQuestion
+        exclude = newExclude
         
         numberCorrect = 0
         questionNumber = 1
@@ -147,7 +137,7 @@
     }
 
     async function handleBackToOptions() {
-        questionQueue = null
+        currentQuestion = null
         error = null
         setInfo = null
         options = null
@@ -161,43 +151,43 @@
         <div></div>
     {:else if !confirmed && !$session.loggedIn}
         <NotLoggedIn on:continue={() => {confirmed = true}} />
-    {:else if questionQueue === null}
+    {:else if currentQuestion === null}
         <PracticeOptionMenu on:start={onStart} />
     {:else if error}
         <p>Set not found</p>
     {:else if practicing}
         {#if options.practiceMode === "timed"}
-            <TimedPractice {setInfo} {options} on:timeEnd={handleEnd}>
-                <svelte:component this={PracticeComponent} {questionQueue}
+            <TimedPractice {setInfo} {options} on:timeEnd={handleEnd} on:exitPractice={handleEnd}>
+                <svelte:component this={PracticeComponent} {currentQuestion}
                     on:correct={handleCorrect} />
             </TimedPractice>
         {:else if options.practiceMode === "fixed-questions"}
             <FixedQuestionPractice {setInfo} {options} {questionNumber} on:practiceEnd={handleEnd}>
-                <svelte:component this={PracticeComponent} {questionQueue} showSkip
+                <svelte:component this={PracticeComponent} {currentQuestion} showSkip
                     on:correct={handleCorrect} on:skip={handleSkip} />
             </FixedQuestionPractice>
         {:else if options.practiceMode === "infinite"}
             <InfinitePractice {setInfo} on:practiceEnd={handleEnd}>
-                <svelte:component this={PracticeComponent} {questionQueue} showSkip
+                <svelte:component this={PracticeComponent} {currentQuestion} showSkip
                     on:correct={handleCorrect} on:skip={handleSkip} />
             </InfinitePractice>
         {:else if options.practiceMode === "streak"}
-            <StreakPractice {setInfo} on:practiceStart={(e) => {timerInterval = e.detail.timerInterval}}>
-                <svelte:component this={PracticeComponent} {questionQueue} showNext
+            <StreakPractice {setInfo} on:practiceStart={(e) => {timerInterval = e.detail.timerInterval}} on:practiceEnd={handleEnd}>
+                <svelte:component this={PracticeComponent} {currentQuestion} showNext
                     on:correct={handleCorrect} on:skip={handleSkip} on:incorrect={handleEnd} />
             </StreakPractice>
         {/if}
     {:else}
         <PracticeResults score={numberCorrect} {modeScore}
-            on:playAgain={handlePlayAgain} on:backToOptions={handleBackToOptions} />
+            on:playAgain={handlePlayAgain} on:backToOptions={handleBackToOptions} lastQuestion={lastQuestionData} />
     {/if}
 </main>
 
 <style lang="scss">
     main {
+        width: 100%;
+        height: 100%;
         display: grid;
         place-content: center;
-        min-height: 80vh;
-        width: 100%;
     }
 </style>

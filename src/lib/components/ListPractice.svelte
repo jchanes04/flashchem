@@ -1,18 +1,21 @@
 <script lang="ts">
+import type { LastQuestionData } from "$lib/client";
+
     import type { SetItem } from "$lib/global";
     import { createEventDispatcher } from "svelte";
 
-    export let questionQueue: SetItem[]
+    export let currentQuestion: SetItem
     export let showSkip: boolean
     export let showNext: boolean
 
+    let skipDisabled = false
 
     const dispatch = createEventDispatcher()
 
     let inputtedValue: string
 
     function handleInput() {
-        if (!showNext && inputtedValue === questionQueue[0].value) {
+        if (!showNext && inputtedValue === currentQuestion.value) {
             dispatch('correct')
             inputtedValue = ""
         }
@@ -29,39 +32,46 @@
     }
 
     function handleNext() {
-        if (inputtedValue === questionQueue[0].value) {
+        if (inputtedValue === currentQuestion.value) {
             dispatch('correct')
             inputtedValue = ""
         } else {
-            dispatch('incorrect')
+            dispatch('incorrect', {
+                lastQuestion: {
+                    key: currentQuestion.key,
+                    givenAnswer: inputtedValue,
+                    correctAnswer: currentQuestion.value
+                } as LastQuestionData
+            })
             inputtedValue = ""
+        }
+    }
+
+    function handleSkip() {
+        skipDisabled = true
+        setTimeout(() => {
+            skipDisabled = false
+        }, 1000)
+        dispatch('skip')
+    }
+
+    function handleKeydown(e: KeyboardEvent) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            handleNext()
         }
     }
 </script>
 
 <div class="list-practice">
-    {#if questionQueue.length}
-        <p class={getKeyClass(questionQueue[0].key.toString())}>{questionQueue[0].key}</p>
-        <div class="input-container">
-            <input type="text" bind:value={inputtedValue} on:input={handleInput} />
-            {#if showNext}
-                <button class="next primary" on:click={handleNext}>Next</button>
-            {/if}
-        </div>
-        {#if showSkip}
-            <p class="skip" on:click={() => dispatch('skip')}>Skip question</p>
+    <p class={getKeyClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
+    <div class="input-container">
+        <input type="text" bind:value={inputtedValue} on:input={handleInput} on:keydown={handleKeydown} />
+        {#if showNext}
+            <button class="next primary" on:click={handleNext}>Next</button>
         {/if}
-    {:else}
-        <p class="medium"></p>
-        <div class="input-container">
-            <input type="text" style="visibility: hidden;" />
-            {#if showNext}
-                <button class="next primary">Next</button>
-            {/if}
-        </div>
-        {#if showSkip}
-            <p class="skip" style="visibility: hidden;">Skip question</p>
-        {/if}
+    </div>
+    {#if showSkip}
+        <p class="skip" class:disabled={skipDisabled} on:click={handleSkip}>Skip question</p>
     {/if}
 </div>
 
@@ -101,6 +111,11 @@
         margin-bottom: 0.5em;
         text-decoration: underline;
         cursor: pointer;
+        user-select: none;
+    }
+
+    .disabled {
+        visibility: hidden;
     }
 
     .next {

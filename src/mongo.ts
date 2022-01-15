@@ -1,7 +1,10 @@
-import type { PracticeSet, UserBase } from '$lib/server';
+import type { UserBase } from '$lib/server';
 import { Collection, Db, MongoClient, Document } from 'mongodb'
+import type { PracticeSet } from '$lib/global';
+import env from '$lib/env';
 
-let client = new MongoClient("DATABASE_URL")
+
+let client = new MongoClient(env.DATABASE_URL)
 let db: Db;
 let userData: Collection;
 let practiceSets: Collection;

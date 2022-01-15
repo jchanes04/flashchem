@@ -1,22 +1,31 @@
 <script lang="ts">
     import type { SetInfo } from "$lib/client";
     import uppercaseWords from "$lib/functions/client/uppercaseWords";
+    import ExitIcon from '$lib/assets/ExitIcon.svelte'
+    import { createEventDispatcher } from "svelte";
 
     export let questionNumber: number
     export let totalQuestions: number
     export let setInfo: SetInfo
+
+    const dispatch = createEventDispatcher()
+
+    function exitPractice() {
+        console.log('w')
+        dispatch('exitPractice')
+    }
 </script>
 
 <div class="practice-toolbar">
     <div class="left">{setInfo.name}</div>
     <div class="question-number">{questionNumber} / {totalQuestions}</div>
     <div class="right" style="">
-        <div>{uppercaseWords(setInfo.difficulty)}</div>
-        <span>|</span>
-        <div>{uppercaseWords(setInfo.type)}</div>
-        <span>|</span>
-        <div>{uppercaseWords(setInfo.topic)}</div>
-        <div class="icon exit-icon"></div>
+        <span>{uppercaseWords(setInfo.difficulty)}</span>
+        <span class="vertical-line">|</span>
+        <span>{uppercaseWords(setInfo.type)}</span>
+        <span class="vertical-line">|</span>
+        <span>{uppercaseWords(setInfo.topic)}</span>
+        <span class="icon" on:click={exitPractice}><ExitIcon /></span>
     </div>
 </div>
 
@@ -58,15 +67,19 @@
         justify-content: right;
         gap: 1em;
 
-        span {
+        .vertical-line {
             transform: scaleY(1.5);
         }
     }
 
     .icon {
-        width: 1.5em;
-        height: 1.5em;
-        background-color: var(--text-light);
+        width: 2em;
+        height: 2em;
         vertical-align: middle;
+        cursor: pointer;
+
+        :global(*) {
+            height: 100%;
+        }
     }
 </style>

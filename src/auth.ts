@@ -1,16 +1,17 @@
 import { google } from 'googleapis'
 import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
 import base64url from 'base64url'
 import fs from 'fs'
 import { getUserData } from './mongo'
+import env from '$lib/env'
+
 const privateKey = fs.readFileSync('jwt.key')
-const publicKey = fs.readFileSync('jwt.key.pub')
+
 
 export const oauth2client = new google.auth.OAuth2(
-    "CLIENT_ID",
-    "CLIENT_SECRET",
-    "https://localhost:3000/callback/google"
+    env.GOOGLE_CLIENT_ID,
+    env.GOOGLE_CLIENT_SECRET,
+    env.VITE_HOST_URL + "/callback/google"
 )
 
 export const authUrl = oauth2client.generateAuthUrl({

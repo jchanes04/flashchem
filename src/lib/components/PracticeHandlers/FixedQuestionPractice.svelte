@@ -25,7 +25,8 @@
 
 <div class="timed-practice">
     <slot></slot>
-    <FixedQuestionPracticeToolbar {setInfo} {questionNumber} {totalQuestions} />
+    <FixedQuestionPracticeToolbar {setInfo} {questionNumber} {totalQuestions}
+        on:exitPractice={() => dispatch('practiceEnd', { practiceLength })} />
 </div>
 
 <style lang="scss">

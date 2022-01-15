@@ -1,9 +1,11 @@
 <script lang="ts">
     import type { ModeScore } from "$lib/client";
     import { createEventDispatcher } from "svelte";
+    import LastQuestion from "./LastQuestion.svelte";
 
     export let score: number
     export let modeScore: ModeScore
+    export let lastQuestion = null
     
     const dispatch = createEventDispatcher()
     
@@ -29,6 +31,9 @@
             </div>
         </div>
     </div>
+    {#if lastQuestion}
+        <LastQuestion {lastQuestion} />
+    {/if}
     <div class="buttons">
         <button class="primary" on:click={() => dispatch("playAgain")}>Play Again</button>
         <button class="primary" on:click={() => dispatch("backToOptions")}>Back to Options</button>
@@ -43,6 +48,9 @@
         color: var(--text-light);
         width: min(700px, 80vw);
         text-align: center;
+        max-height: 70vh;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     h1 {

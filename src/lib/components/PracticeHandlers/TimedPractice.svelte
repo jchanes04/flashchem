@@ -13,16 +13,21 @@
     const timerInterval = setInterval(() => {
         if (time === 0) {
             clearInterval(timerInterval)
-            dispatch("timeEnd")
+            dispatch("timeEnd", { practiceLength: options.practiceTime })
         } else {
             time--
         }
     }, 1000)
+
+    function handleExit(e: CustomEvent) {
+        const { time } = e.detail
+        dispatch('exitPractice', { practiceLength: options.practiceTime - time })
+    }
 </script>
 
 <div class="timed-practice">
     <slot></slot>
-    <TimedPracticeToolbar {time} {setInfo} />
+    <TimedPracticeToolbar {time} {setInfo} on:exitPractice={handleExit} />
 </div>
 
 <style lang="scss">

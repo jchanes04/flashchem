@@ -25,7 +25,7 @@
     </div>
     <nav>
         <a href="/"><div class="link-wrapper">Home</div></a>
-        <a href="/practice"><div class="link-wrapper">Practice</div></a>
+        <a href="/practice" rel="external"><div class="link-wrapper">Practice</div></a>
         <a href="/about"><div class="link-wrapper">About</div></a>
         <a href="/account"><div class="link-wrapper">Account</div></a>
     </nav>
