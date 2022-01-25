@@ -1,5 +1,6 @@
 <script lang="ts">
-import type { LastQuestionData } from "$lib/client";
+    import type { LastQuestionData } from "$lib/client";
+import getTextSizeClass from "$lib/functions/client/getTextSizeClass";
 
     import type { SetItem } from "$lib/global";
     import { createEventDispatcher } from "svelte";
@@ -18,16 +19,6 @@ import type { LastQuestionData } from "$lib/client";
         if (!showNext && inputtedValue === currentQuestion.value) {
             dispatch('correct')
             inputtedValue = ""
-        }
-    }
-
-    function getKeyClass(key: string) {
-        if (key.length <= 2) {
-            return "large"
-        } else if (key.length <= 24) {
-            return "medium"
-        } else {
-            return "small"
         }
     }
 
@@ -63,7 +54,7 @@ import type { LastQuestionData } from "$lib/client";
 </script>
 
 <div class="list-practice">
-    <p class={getKeyClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
+    <p class={getTextSizeClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
     <div class="input-container">
         <input type="text" bind:value={inputtedValue} on:input={handleInput} on:keydown={handleKeydown} />
         {#if showNext}
@@ -82,7 +73,7 @@ import type { LastQuestionData } from "$lib/client";
     }
 
     .large {
-        font-size: 40px;
+        font-size: 56px;
     }
 
     .input-container {

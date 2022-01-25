@@ -22,9 +22,14 @@ export type NextQuestionResponse = {
     resetExclude: boolean
 }
 
-export type ModeScore = {
-    number: number,
-    units: string
+// export type ModeScore = {
+//     number: number,
+//     units: string
+// }
+
+export type PracticeStatistic = {
+    figure: number | string,
+    units?: string
 }
 
 export type LastQuestionData = {

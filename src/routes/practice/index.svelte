@@ -21,7 +21,7 @@
     import NotLoggedIn from "$lib/components/NotLoggedIn.svelte";
     import PracticeOptionMenu from "$lib/components/PracticeOptionMenu.svelte";
     import { onMount } from "svelte";
-    import type { LastQuestionData, ModeScore, NextQuestionResponse, PracticeOptions, SetInfo } from "$lib/client";
+    import type { LastQuestionData, NextQuestionResponse, PracticeOptions, PracticeStatistic, SetInfo } from "$lib/client";
     import type { SetItem } from "$lib/global";
     import TimedPractice from "$lib/components/PracticeHandlers/TimedPractice.svelte";
     import PracticeResults from "$lib/components/PracticeResults.svelte";
@@ -30,6 +30,7 @@
     import StreakPractice from "$lib/components/PracticeHandlers/StreakPractice.svelte";
     import type { PracticeSet } from "$lib/global";
     import getNextQuestion from "$lib/functions/client/getNextQuestion";
+import numberToTime from "$lib/functions/client/numberToTime";
 
     export let confirmed = undefined
     let practicing = false
@@ -44,7 +45,8 @@
     let currentQuestion: SetItem = null
 
     let numberCorrect = 0
-    let modeScore: ModeScore = null
+    // let modeScore: ModeScore = null
+    let practiceStatistics: PracticeStatistic[] = []
     let questionNumber = 1
     let lastQuestionData: LastQuestionData = null
 
@@ -100,27 +102,39 @@
         practicing = false
         clearInterval(timerInterval)
 
+        const { practiceLength, lastQuestion } = e.detail
+
         if (options.practiceMode === "timed") {
-            modeScore = {
-                number: numberCorrect / e.detail.practiceLength,
+            practiceStatistics = [{
+                figure: (numberCorrect / practiceLength).toFixed(2),
                 units: "questions / second"
-            }
+            }]
         } else if (options.practiceMode === "fixed-questions") {
-            modeScore = {
-                number: numberCorrect / e.detail.practiceLength,
+            practiceStatistics = [{
+                figure: (numberCorrect / practiceLength).toFixed(2),
                 units: "questions / second"
-            }
+            }]
         } else if (options.practiceMode === "infinite") {
-            modeScore = {
-                number: 100 * numberCorrect / (questionNumber - 1),
-                units: "% correct"
-            }
+            practiceStatistics = [
+                {
+                    figure: (100 * numberCorrect / (questionNumber - 1)).toFixed(1),
+                    units: "% correct"
+                },
+                {
+                    figure: (numberCorrect / practiceLength).toFixed(2),
+                    units: "questions / second"
+                },
+                {
+                    figure: practiceLength > 150 ? numberToTime(practiceLength) : practiceLength ,
+                    units: practiceLength > 150 ? "minutes long" : "seconds long" 
+                }
+            ]
         } else if (options.practiceMode === "streak") {
-            modeScore = {
-                number: 100 * numberCorrect / questionNumber,
+            practiceStatistics = [{
+                figure: 100 * numberCorrect / questionNumber,
                 units: "% correct"
-            }
-            lastQuestionData = e.detail.lastQuestion
+            }]
+            lastQuestionData = lastQuestion
         }
     }
 
@@ -131,7 +145,7 @@
         
         numberCorrect = 0
         questionNumber = 1
-        modeScore = null
+        practiceStatistics = []
         exclude = []
         practicing = true
     }
@@ -142,7 +156,7 @@
         setInfo = null
         options = null
         exclude = []
-        modeScore = null
+        practiceStatistics = []
     }
 </script>
 
@@ -178,7 +192,7 @@
             </StreakPractice>
         {/if}
     {:else}
-        <PracticeResults score={numberCorrect} {modeScore}
+        <PracticeResults score={numberCorrect} {practiceStatistics}
             on:playAgain={handlePlayAgain} on:backToOptions={handleBackToOptions} lastQuestion={lastQuestionData} />
     {/if}
 </main>

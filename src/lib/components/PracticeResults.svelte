@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type { ModeScore } from "$lib/client";
+    import type { PracticeStatistic } from "$lib/client";
     import { createEventDispatcher } from "svelte";
     import LastQuestion from "./LastQuestion.svelte";
 
     export let score: number
-    export let modeScore: ModeScore
+    export let practiceStatistics: PracticeStatistic[]
     export let lastQuestion = null
     
     const dispatch = createEventDispatcher()
@@ -19,12 +19,12 @@
                 <p class="score">{score}</p>
                 <p class="units">correct</p>
             </div>
-            {#if modeScore}
+            {#each practiceStatistics as s}
                 <div>
-                    <p class="score">{modeScore.number.toFixed(1)}</p>
-                    <p class="units">{modeScore.units}</p>
+                    <p class="score">{s.figure}</p>
+                    <p class="units">{s.units}</p>
                 </div>
-            {/if}
+            {/each}
             <div>
                 <p class="score">--</p>
                 <p class="units">percentile</p>
@@ -69,12 +69,15 @@
         flex-wrap: wrap;
         align-items: center;
         margin-right: -1px;
+        margin-bottom: -1px;
 
         > * {
             min-width: 200px;
             flex-grow: 1;
             flex-basis: 1px;
             border-right: 1px solid var(--text-light);
+            border-bottom: 1px solid var(--text-light);
+            padding: 13px;
         }
     }
 
