@@ -37,12 +37,61 @@
         if (currentSection.type === "normal") {
             if (e.data === "+") {
                 if (currentSection.content[cursorCoordinates[1] - 1] !== " ") {
-                    sections = [...sections, {
-                        startIndex: contentLength + 1,
-                        endIndex: contentLength + 2,
-                        content: "+",
-                        type: "superscript"
-                    }]
+                    if (cursorCoordinates[1] == 0) {
+                        sections = [
+                            ...sections.slice(0, cursorCoordinates[0]),
+                            {
+                                startIndex: currentSection.startIndex,
+                                endIndex: currentSection.startIndex + 1,
+                                type: "superscript",
+                                content: "+"
+                            },
+                            {
+                                startIndex: currentSection.startIndex + 2,
+                                endIndex: currentSection.endIndex + 2,
+                                type: "normal",
+                                content: currentSection.content
+                            },
+                            ...sections.slice(cursorCoordinates[0] + 1).map(s => {
+                                return {
+                                    startIndex: s.startIndex + 2,
+                                    endIndex: s.endIndex + 2,
+                                    type: s.type,
+                                    content: s.content
+                                }
+                            })
+                        ]
+                    } else {
+                        sections = [
+                            ...sections.slice(0, cursorCoordinates[0]),
+                            {
+                                startIndex: currentSection.startIndex,
+                                endIndex: currentSection.startIndex + cursorCoordinates[1],
+                                type: "normal",
+                                content: currentSection.content.slice(0, cursorCoordinates[1])
+                            },
+                            {
+                                startIndex: currentSection.startIndex + cursorCoordinates[1] + 1,
+                                endIndex: currentSection.startIndex + cursorCoordinates[1] + 2,
+                                type: "superscript",
+                                content: "+"
+                            },
+                            {
+                                startIndex: currentSection.startIndex + cursorCoordinates[1] + 3,
+                                endIndex: currentSection.endIndex + 3,
+                                type: "normal",
+                                content: currentSection.content.slice(cursorCoordinates[1])
+                            },
+                            ...sections.slice(cursorCoordinates[0] + 1).map(s => {
+                                return {
+                                    startIndex: s.startIndex + 2,
+                                    endIndex: s.endIndex + 2,
+                                    type: s.type,
+                                    content: s.content
+                                }
+                            })
+                        ]
+                    }
                     contentLength++
                 }
             } else {
