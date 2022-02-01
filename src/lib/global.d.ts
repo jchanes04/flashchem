@@ -1,3 +1,5 @@
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
 export type Difficulty = "starter" | "basic" | "intermediate" | "advanced" | "complete"
 export type Topic = 
     "atomic numbers" |
@@ -17,6 +19,6 @@ export type PracticeSet = {
     type: SetType,
     description: string,
     items: SetItem[],
-    createdAt: string,
-    updatedAt: string
+    createdAt: Date,
+    updatedAt: Date
 }

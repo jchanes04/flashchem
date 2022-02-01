@@ -7,6 +7,7 @@
     import { indexToTime, timeFormatter, timeHandleFormatter } from './PracticeOptions';
     import { session } from '$app/stores';
     import { createEventDispatcher, tick } from 'svelte';
+    import SelectedSet from './SelectedSet.svelte';
 
     const groupBy = item => item.difficulty
     async function handleSelect(e) {
@@ -79,11 +80,13 @@
         <h2>Practice Set</h2>
         <div class="select-wrapper">
             <div class="set-select-wrapper" class:hidden={searching}>
-                <Select items={[...setsList(), {
-                    type: 'other',
-                    name: 'Search for more sets',
-                    id: 'search'
-                }]} {groupBy} optionIdentifier="id" labelIdentifier="name" showChevron={true} placeholder="Choose a Set"
+                <Select items={[...setsList(), 
+                    // {
+                    //     type: 'other',
+                    //     name: 'Search for more sets',
+                    //     id: 'search'
+                    // }
+                ]} {groupBy} optionIdentifier="id" labelIdentifier="name" showChevron={true} placeholder="Choose a Set"
                 on:select={handleSelect} on:clear={handleClear} bind:value={setSelectValue} />
             </div>
             {#if searching}
@@ -92,6 +95,10 @@
                     loadOptions={loadSets} {getSelectionLabel} {getOptionLabel} />
             {/if}
         </div>
+
+        {#if selectedSet}
+            <SelectedSet {selectedSet} />
+        {/if}
     </div>
     <div class="setting">
         <h2>Mode</h2>

@@ -1,14 +1,8 @@
-import type { Difficulty, SetItem, Topic, Type } from "./global"
+import type { Difficulty, PracticeSet, SetItem, Topic, Type, Optional } from "./global"
 
 export type PracticeMode = "timed" | "fixed-questions" | "streak" | "infinite"
 
-export type SetInfo = {
-    difficulty: Difficulty,
-    topic: Topic,
-    type: SetType,
-    name: string,
-    id: string
-}
+export type SetInfo = Optional<Omit<PracticeSet, 'items'>, 'createdAt' | 'updatedAt'>
 
 export type PracticeOptions = {
     selectedSet: SetInfo & { isGroupItem: boolean },
