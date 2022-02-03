@@ -1,14 +1,13 @@
 import type { Difficulty, PracticeSet, SetItem, Topic, Type, Optional } from "./global"
 
-export type PracticeMode = "timed" | "fixed-questions" | "streak" | "infinite"
-
 export type SetInfo = Optional<Omit<PracticeSet, 'items'>, 'createdAt' | 'updatedAt'>
 
 export type PracticeOptions = {
     selectedSet: SetInfo & { isGroupItem: boolean },
     practiceMode: PracticeMode,
     practiceTime?: number,
-    practiceQuestions?: number
+    practiceQuestions?: number,
+    postScore: boolean
 }
 
 export type NextQuestionResponse = {

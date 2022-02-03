@@ -1,13 +1,14 @@
 import type { UserBase } from '$lib/server';
-import { Collection, Db, MongoClient, Document } from 'mongodb'
-import type { PracticeSet } from '$lib/global';
+import { Collection, Db, MongoClient, Document, FindCursor } from 'mongodb'
+import type { PracticeSet, UserScore } from '$lib/global';
 import env from '$lib/env';
 
 
 let client = new MongoClient(env.DATABASE_URL)
 let db: Db;
 let userData: Collection;
-let practiceSets: Collection;
+let practiceSets: Collection<PracticeSet>;
+let userScores: Collection<UserScore>;
 export async function init() {
     try {
         console.log("Connecting...")
@@ -16,6 +17,7 @@ export async function init() {
         db = client.db("flashchem")
         userData = db.collection("userData")
         practiceSets = db.collection("practiceSets")
+        userScores = db.collection("userScores")
         return true
     } catch (e) {
         console.log(e)
@@ -53,7 +55,27 @@ export const getSetById = queryWrapper(async (id: string) => {
     return remove_id(practiceSets.findOne({ id })) as Promise<PracticeSet>
 })
 
-async function remove_id(document: Document | Promise<Document>) {
+export const getScoreByHash = queryWrapper(async (hash: string) => {
+    return remove_id(userScores.findOne({ hash })) as Promise<UserScore>
+})
+
+export const getScoresBySet = queryWrapper(async (setId: string) => {
+    const findCursor: FindCursor<UserScore> = userScores.find({ setId })
+    const scoresArray = await findCursor.toArray()
+    return Promise.all(scoresArray.map(x => remove_id<UserScore>(x)))
+})
+
+export const getScoresByUser = queryWrapper(async (userId: string) => {
+    const findCursor: FindCursor<UserScore> = userScores.find({ userId })
+    const scoresArray = await findCursor.toArray()
+    return Promise.all(scoresArray.map(x => remove_id<UserScore>(x)))
+})
+
+export const addNewScore = queryWrapper(async (scoreData: UserScore) => {
+    return userScores.insertOne(scoreData)
+})
+
+async function remove_id<T>(document: Document | Promise<Document>): Promise<T> {
     let resolved = await document
     if (!resolved) return null
 

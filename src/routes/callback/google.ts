@@ -1,7 +1,7 @@
-import { generateSignupHash, generateToken, oauth2client } from "../../auth";
+import { generateSignupHash, generateToken, oauth2client } from "$lib/auth";
 import type { Request } from "@sveltejs/kit";
 import type { oauth2_v2 } from "googleapis";
-import { getUserData } from "../../mongo";
+import { getUserData } from "$lib/mongo";
 
 export async function get({ query }: Request) {
     let code = query.get('code')

@@ -1,5 +1,5 @@
 import type { Request } from "@sveltejs/kit";
-import { usernameTaken } from "../../mongo";
+import { usernameTaken } from "$lib/mongo";
 
 export async function get({ query }: Request) {
     let username = query.get('username')

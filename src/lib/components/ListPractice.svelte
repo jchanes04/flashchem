@@ -3,7 +3,7 @@
 import getTextSizeClass from "$lib/functions/client/getTextSizeClass";
 
     import type { SetItem } from "$lib/global";
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
 
     export let currentQuestion: SetItem
     export let showSkip: boolean
@@ -13,7 +13,12 @@ import getTextSizeClass from "$lib/functions/client/getTextSizeClass";
 
     const dispatch = createEventDispatcher()
 
+    let inputElement: HTMLInputElement
     let inputtedValue: string
+
+    onMount(() => {
+        inputElement.focus()
+    })
 
     function handleInput() {
         if (!showNext && inputtedValue === currentQuestion.value) {
@@ -56,7 +61,7 @@ import getTextSizeClass from "$lib/functions/client/getTextSizeClass";
 <div class="list-practice">
     <p class={getTextSizeClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
     <div class="input-container">
-        <input type="text" bind:value={inputtedValue} on:input={handleInput} on:keydown={handleKeydown} />
+        <input type="text" bind:this={inputElement} bind:value={inputtedValue} on:input={handleInput} on:keydown={handleKeydown} />
         {#if showNext}
             <button class="next primary" on:click={handleNext}>Next</button>
         {/if}

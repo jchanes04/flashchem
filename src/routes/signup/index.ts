@@ -1,8 +1,8 @@
 import createNewUser from "$lib/functions/server/createNewUser";
 import type { Request } from "@sveltejs/kit";
 import type { ReadOnlyFormData } from "@sveltejs/kit/types/helper";
-import { addNewUser } from "../../mongo";
-import { decryptSignupHash } from "../../auth";
+import { addNewUser } from "$lib/mongo";
+import { decryptSignupHash } from "$lib/auth";
 
 export async function get({ query }: Request) {
     let hash = query.get('hash')

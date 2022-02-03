@@ -7,6 +7,15 @@ export type Topic =
     "periodic table locations" |
     "chemical formulas"
 
+export type PracticeMode = "timed" | "fixed-questions" | "streak" | "infinite"
+export type PracticeLength<T> = T extends "timed"
+    ? 45 | 135 | 300
+    : T extends "fixed-questions"
+        ? 20 | 35 | 50
+        : "streak"
+
+export type LeaderboardName<T extends PracticeMode> = `${T}-${PracticeLength<T>}`
+
 export type SetType = "list" | "name" | "place" | "compare"
 
 export type SetItem = { key: string | number, value: string | number, i: number }
@@ -21,4 +30,13 @@ export type PracticeSet = {
     items: SetItem[],
     createdAt: Date,
     updatedAt: Date
+}
+
+export type UserScore = {
+    hash: string,
+    setId: string,
+    leaderboardName: LeaderboardName,
+    userId: string,
+    score: number,
+    createdAt: Date
 }

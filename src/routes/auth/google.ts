@@ -1,4 +1,4 @@
-import { authUrl } from '../../auth'
+import { authUrl } from '$lib/auth'
 
 export async function get() {
     return {

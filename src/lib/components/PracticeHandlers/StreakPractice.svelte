@@ -15,7 +15,7 @@
 
     function handleExit() {
         clearInterval(timerInterval)
-        dispatch('practiceEnd')
+        dispatch('practiceEnd', { practiceLength: time })
     }
 </script>
 

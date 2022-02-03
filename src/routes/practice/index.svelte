@@ -22,7 +22,7 @@
     import PracticeOptionMenu from "$lib/components/PracticeOptionMenu.svelte";
     import { onMount } from "svelte";
     import type { LastQuestionData, NextQuestionResponse, PracticeOptions, PracticeStatistic, SetInfo } from "$lib/client";
-    import type { SetItem } from "$lib/global";
+    import type { PracticeLength, SetItem } from "$lib/global";
     import TimedPractice from "$lib/components/PracticeHandlers/TimedPractice.svelte";
     import PracticeResults from "$lib/components/PracticeResults.svelte";
     import FixedQuestionPractice from "$lib/components/PracticeHandlers/FixedQuestionPractice.svelte";
@@ -30,7 +30,9 @@
     import StreakPractice from "$lib/components/PracticeHandlers/StreakPractice.svelte";
     import type { PracticeSet } from "$lib/global";
     import getNextQuestion from "$lib/functions/client/getNextQuestion";
-import numberToTime from "$lib/functions/client/numberToTime";
+    import numberToTime from "$lib/functions/client/numberToTime";
+    import sendScores from "$lib/functions/client/sendScores";
+import { calculateFixedQuestionScore, calculateStreakScore, calculateTimedScore } from "$lib/functions/client/calculateScore";
 
     export let confirmed = undefined
     let practicing = false
@@ -45,10 +47,13 @@ import numberToTime from "$lib/functions/client/numberToTime";
     let currentQuestion: SetItem = null
 
     let numberCorrect = 0
+    let score = 0
     // let modeScore: ModeScore = null
     let practiceStatistics: PracticeStatistic[] = []
     let questionNumber = 1
     let lastQuestionData: LastQuestionData = null
+
+    let scoreSubmitError = null
 
     let timerInterval = null
 
@@ -61,6 +66,7 @@ import numberToTime from "$lib/functions/client/numberToTime";
     })
 
     async function onStart(e: CustomEvent<PracticeOptions>) {
+        console.dir($session)
         options = e.detail
         setInfo = options.selectedSet
         history.pushState({}, '', '/practice/?set=' + options.selectedSet.id)
@@ -98,7 +104,7 @@ import numberToTime from "$lib/functions/client/numberToTime";
         currentQuestion = nextQuestion
     }
 
-    function handleEnd(e?: CustomEvent<{ practiceLength?: number, lastQuestion?: LastQuestionData }>) {
+    async function handleEnd(e?: CustomEvent<{ practiceLength: number, lastQuestion?: LastQuestionData }>) {
         practicing = false
         clearInterval(timerInterval)
 
@@ -109,11 +115,15 @@ import numberToTime from "$lib/functions/client/numberToTime";
                 figure: (numberCorrect / practiceLength).toFixed(2),
                 units: "questions / second"
             }]
+            score = calculateTimedScore(practiceLength, numberCorrect)
+            scoreSubmitError = await sendScores(score, $session.userData.userId, options, <PracticeLength<"timed">>practiceLength)
         } else if (options.practiceMode === "fixed-questions") {
             practiceStatistics = [{
                 figure: (numberCorrect / practiceLength).toFixed(2),
                 units: "questions / second"
             }]
+            score = calculateFixedQuestionScore(practiceLength, numberCorrect)
+            scoreSubmitError = await sendScores(score, $session.userData.userId, options, <PracticeLength<"fixed-questions">>practiceLength)
         } else if (options.practiceMode === "infinite") {
             practiceStatistics = [
                 {
@@ -131,10 +141,12 @@ import numberToTime from "$lib/functions/client/numberToTime";
             ]
         } else if (options.practiceMode === "streak") {
             practiceStatistics = [{
-                figure: 100 * numberCorrect / questionNumber,
+                figure: (100 * numberCorrect / questionNumber).toFixed(1),
                 units: "% correct"
             }]
+            score = calculateStreakScore(practiceLength, numberCorrect)
             lastQuestionData = lastQuestion
+            scoreSubmitError = await sendScores(score, $session.userData.userId, options, "streak")
         }
     }
 
@@ -192,7 +204,7 @@ import numberToTime from "$lib/functions/client/numberToTime";
             </StreakPractice>
         {/if}
     {:else}
-        <PracticeResults score={numberCorrect} {practiceStatistics}
+        <PracticeResults {numberCorrect} {score} {practiceStatistics} practiceOptions={options}
             on:playAgain={handlePlayAgain} on:backToOptions={handleBackToOptions} lastQuestion={lastQuestionData} />
     {/if}
 </main>

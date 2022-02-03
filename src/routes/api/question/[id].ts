@@ -1,5 +1,5 @@
 import type { Request } from "@sveltejs/kit";
-import { getSetById } from "../../../mongo";
+import { getSetById } from "$lib/mongo";
 
 export async function get({ params, query }: Request) {
     const { id } = params

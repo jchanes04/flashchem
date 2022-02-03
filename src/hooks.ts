@@ -1,11 +1,11 @@
 import type { Request, Response } from "@sveltejs/kit";
-import { getUserFromToken } from "./auth";
-import { init } from './mongo'
+import { getUserFromToken } from "$lib/auth";
+import { init } from '$lib/mongo'
 type Resolve = (request: Request<Record<string, any>>) => Response | Promise<Response>
 
 init()
 
-const authenticatedEndpoints = ["account"]
+const authenticatedEndpoints = ["account", "score"]
 
 export async function handle({ request, resolve }: { request: Request, resolve: Resolve }) {
     let endpoint = request.path.split("/")[1]

@@ -3,11 +3,12 @@
     import Select from 'svelte-select'
     import Slider from 'svelte-range-slider-pips'
     import loadSets from '$lib/functions/client/loadSets';
-    import type { PracticeMode, SetInfo } from '$lib/client';
+    import type { SetInfo } from '$lib/client';
     import { indexToTime, timeFormatter, timeHandleFormatter } from './PracticeOptions';
     import { session } from '$app/stores';
     import { createEventDispatcher, tick } from 'svelte';
     import SelectedSet from './SelectedSet.svelte';
+import type { PracticeMode } from '$lib/global';
 
     const groupBy = item => item.difficulty
     async function handleSelect(e) {
@@ -45,8 +46,7 @@
     $: setLengthMode(practiceMode)
 
     let practiceTime = 2
-    let practiceQuestions = 25
-    $: console.log(practiceQuestions)
+    let practiceQuestions = 20
 
     function handleTimeChange(e: CustomEvent) {
         const { value } = e.detail
@@ -61,17 +61,22 @@
     let postScore = true
 
     $: startDisabled = !(selectedSet && practiceMode && (practiceTime || practiceQuestions))
+    $: scoreboardEnabled = practiceMode === "timed"
+        ? [0, 2, 5].includes(practiceTime)
+        : practiceMode === "fixed-questions"
+            ? [20, 35, 50].includes(practiceQuestions)
+            : practiceMode === "streak"
+
     const dispatch = createEventDispatcher()
     function startPractice() {
         dispatch('start', {
             selectedSet,
             practiceMode,
             practiceTime: practiceMode === "timed" ? indexToTime(practiceTime) : null,
-            practiceQuestions: practiceMode === "fixed-questions" ? practiceQuestions : null
+            practiceQuestions: practiceMode === "fixed-questions" ? practiceQuestions : null,
+            postScore: postScore && $session.loggedIn && scoreboardEnabled
         })
     }
-
-    $: console.log(selectedSet)
 </script>
 
 <div id="practice-options">
@@ -139,8 +144,8 @@
         </div>
     </div>
     {#if $session.loggedIn}
-        <div class="setting">
-            <h2>Other</h2>
+        <div class="setting" class:grayed={!scoreboardEnabled}>
+            <h2>Scoreboard</h2>
             <label class="checkbox" for="post-score-input">
                 <input id="post-score-input" type="checkbox" name="post-score" bind:checked={postScore} />
                 <span />
