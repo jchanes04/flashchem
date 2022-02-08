@@ -37,5 +37,6 @@
         padding: 2.5em;
         color: var(--text-light);
         width: min(700px, 80vw);
+        max-height: 60vh;
     }
 </style>

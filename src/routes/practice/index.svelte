@@ -32,7 +32,8 @@
     import getNextQuestion from "$lib/functions/client/getNextQuestion";
     import numberToTime from "$lib/functions/client/numberToTime";
     import sendScores from "$lib/functions/client/sendScores";
-import { calculateFixedQuestionScore, calculateStreakScore, calculateTimedScore } from "$lib/functions/client/calculateScore";
+    import { calculateFixedQuestionScore, calculateStreakScore, calculateTimedScore } from "$lib/functions/client/calculateScore";
+    import PlacePractice from "$lib/components/PlacePractice.svelte";
 
     export let confirmed = undefined
     let practicing = false
@@ -58,7 +59,9 @@ import { calculateFixedQuestionScore, calculateStreakScore, calculateTimedScore 
     let timerInterval = null
 
     $: PracticeComponent = setInfo?.type === "list" ? ListPractice
-        : ListPractice
+        : setInfo?.type === "place"
+            ? PlacePractice
+            : ListPractice
 
 
     onMount(() => {
@@ -116,14 +119,18 @@ import { calculateFixedQuestionScore, calculateStreakScore, calculateTimedScore 
                 units: "questions / second"
             }]
             score = calculateTimedScore(practiceLength, numberCorrect)
-            scoreSubmitError = await sendScores(score, $session.userData.userId, options, <PracticeLength<"timed">>practiceLength)
+            
+            if (options.postScore)
+                scoreSubmitError = await sendScores(score, $session.userData.userId, options, <PracticeLength<"timed">>practiceLength)
         } else if (options.practiceMode === "fixed-questions") {
             practiceStatistics = [{
                 figure: (numberCorrect / practiceLength).toFixed(2),
                 units: "questions / second"
             }]
             score = calculateFixedQuestionScore(practiceLength, numberCorrect)
-            scoreSubmitError = await sendScores(score, $session.userData.userId, options, <PracticeLength<"fixed-questions">>practiceLength)
+            
+            if (options.postScore)
+                scoreSubmitError = await sendScores(score, $session.userData.userId, options, <PracticeLength<"fixed-questions">>practiceLength)
         } else if (options.practiceMode === "infinite") {
             practiceStatistics = [
                 {
@@ -146,7 +153,9 @@ import { calculateFixedQuestionScore, calculateStreakScore, calculateTimedScore 
             }]
             score = calculateStreakScore(practiceLength, numberCorrect)
             lastQuestionData = lastQuestion
-            scoreSubmitError = await sendScores(score, $session.userData.userId, options, "streak")
+            
+            if (options.postScore)
+                scoreSubmitError = await sendScores(score, $session.userData.userId, options, "streak")
         }
     }
 

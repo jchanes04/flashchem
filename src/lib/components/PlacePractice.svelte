@@ -4,42 +4,27 @@
 
     import type { SetItem } from "$lib/global";
     import { createEventDispatcher, onMount } from "svelte";
+    import PeriodicTableInput from "./PeriodicTableInput.svelte";
 
     export let currentQuestion: SetItem
     export let showSkip: boolean
-    export let showNext: boolean
 
     let skipDisabled = false
 
     const dispatch = createEventDispatcher()
 
-    let inputElement: HTMLInputElement
-    let inputtedValue: string
-
-    onMount(() => {
-        inputElement.focus()
-    })
-
-    function handleInput() {
-        if (!showNext && inputtedValue === currentQuestion.value) {
+    function handleAnswer(e: CustomEvent<{ selectedElement: number }>) {
+        const { selectedElement } = e.detail
+        if (selectedElement === currentQuestion.value) {
             dispatch('correct')
-            inputtedValue = ""
-        }
-    }
-
-    function handleNext() {
-        if (inputtedValue === currentQuestion.value) {
-            dispatch('correct')
-            inputtedValue = ""
         } else {
             dispatch('incorrect', {
                 lastQuestion: {
                     key: currentQuestion.key,
-                    givenAnswer: inputtedValue,
+                    givenAnswer: selectedElement,
                     correctAnswer: currentQuestion.value
                 } as LastQuestionData
             })
-            inputtedValue = ""
         }
     }
 
@@ -50,31 +35,20 @@
         }, 1000)
         dispatch('skip')
     }
-
-    function handleKeydown(e: KeyboardEvent) {
-        if (e.key === "Enter" || e.keyCode === 13) {
-            handleNext()
-        }
-    }
 </script>
 
-<div class="list-practice">
+<div class="place-practice">
     <p class={getTextSizeClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
-    <div class="input-container">
-        <input type="text" bind:this={inputElement} bind:value={inputtedValue} on:input={handleInput} on:keydown={handleKeydown} />
-        {#if showNext}
-            <button class="next primary" on:click={handleNext}>Next</button>
-        {/if}
-    </div>
     {#if showSkip}
         <p class="skip" class:disabled={skipDisabled} on:click={handleSkip}>Skip question</p>
     {/if}
+    <PeriodicTableInput on:answer={handleAnswer} />
 </div>
 
 <style lang="scss">
     p {
         text-align: center;
-        margin-top: 0;
+        margin: 0;
     }
 
     .large {
@@ -86,20 +60,6 @@
         flex-direction: row;
         justify-content: center;
         margin-left: 0.3em;
-    }
-
-    input {
-        background: var(--background-1);
-        border-radius: 7px;
-        color: var(--text-light);
-        border: none;
-        outline: none;
-        padding: 0.3em 0.5em;
-        font-size: 24px;
-        display: inline-block;
-        width: 36ch;
-        max-width: 90%;
-        text-align: center;
     }
 
     .skip {
@@ -116,17 +76,6 @@
 
     .next {
         width: 8ch;
-    }
-
-    button {
-        border-radius: 10px;
-        font-size: 24px;
-        font-weight: 600;
-        border: none;
-        margin: 0 0.5em;
-        padding: 0.3em 0.5em;
-        color: var(--text-dark);
-        cursor: pointer;
     }
 
     .primary {

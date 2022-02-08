@@ -30,3 +30,11 @@ export type LastQuestionData = {
     correctAnswer: string | number,
     givenAnswer: string | number
 }
+
+export type PtableElementInfo = {
+    atomicNumber: string,
+    symbol: string,
+    atomicMass: string,
+    gridX: number,
+    gridY: number
+}

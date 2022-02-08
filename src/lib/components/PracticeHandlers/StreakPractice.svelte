@@ -19,13 +19,13 @@
     }
 </script>
 
-<div class="timed-practice">
+<div class="streak-practice">
     <slot></slot>
     <TimedPracticeToolbar {time} {setInfo} on:exitPractice={handleExit} />
 </div>
 
 <style lang="scss">
-    .timed-practice {
+    .streak-practice {
         background: var(--background-3);
         border-radius: 15px;
         padding: 2.5em;

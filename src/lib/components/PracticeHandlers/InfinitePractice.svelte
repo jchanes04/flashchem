@@ -21,13 +21,13 @@
     }
 </script>
 
-<div class="timed-practice">
+<div class="infinite-practice">
     <slot></slot>
     <TimedPracticeToolbar {time} {setInfo} on:exitPractice={handleExit} />
 </div>
 
 <style lang="scss">
-    .timed-practice {
+    .infinite-practice {
         background: var(--background-3);
         border-radius: 15px;
         padding: 2.5em;

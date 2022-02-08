@@ -23,14 +23,14 @@
     }
 </script>
 
-<div class="timed-practice">
+<div class="fixed-question-practice">
     <slot></slot>
     <FixedQuestionPracticeToolbar {setInfo} {questionNumber} {totalQuestions}
         on:exitPractice={() => dispatch('practiceEnd', { practiceLength })} />
 </div>
 
 <style lang="scss">
-    .timed-practice {
+    .fixed-question-practice {
         background: var(--background-3);
         border-radius: 15px;
         padding: 2.5em;

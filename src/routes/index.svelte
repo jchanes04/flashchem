@@ -1,6 +1,6 @@
 <script lang="ts">
-    import ChemicalFormulaKeypad from "$lib/components/ChemicalFormulaInput.svelte";
+    import PeriodicTableInput from "$lib/components/PeriodicTableInput.svelte";
 </script>
 
 <a href="/auth/google">Sign In</a>
-<ChemicalFormulaKeypad />
+<PeriodicTableInput defaultFontSize={25} />
