@@ -8,7 +8,10 @@ export function setsList(): SetInfo[] {
             type: 'list',
             name: 'Atomic Numbers - Starter',
             description: 'Contains the first 18 elements and their atomic numbers. This is a good first set to learn for beginners.',
-            id: 'S1'
+            id: 'S1',
+            etc: {
+                inputType: "number"
+            }
         },
         {
             difficulty: 'starter',
@@ -16,7 +19,10 @@ export function setsList(): SetInfo[] {
             type: 'list',
             name: 'Atomic Masses - Starter',
             description: 'Contains the first 18 elements and their atomic masses. This is a good first set to learn for beginners.',
-            id: 'S2'
+            id: 'S2',
+            etc: {
+                inputType: "number"
+            }
         },
         {
             difficulty: 'starter',

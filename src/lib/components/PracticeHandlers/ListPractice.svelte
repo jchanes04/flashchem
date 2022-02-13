@@ -3,6 +3,7 @@
     import getTextSizeClass from "$lib/functions/client/getTextSizeClass";
 
     import type { SetItem } from "$lib/global";
+    import practiceOptions from "$lib/stores/practiceOptions";
     import { createEventDispatcher, onMount } from "svelte";
 
     export let currentQuestion: SetItem
@@ -15,15 +16,25 @@
 
     let inputElement: HTMLInputElement
     let inputtedValue: string
+    let lastValue = ""
+
+    const numberRegex = /^[0-9]*\.?[0-9]*$/
 
     onMount(() => {
         inputElement.focus()
+        console.dir($practiceOptions.selectedSet)
     })
 
     function handleInput() {
         if (!showNext && inputtedValue === currentQuestion.value) {
             dispatch('correct')
             inputtedValue = ""
+        } else if ($practiceOptions.selectedSet.etc?.inputType === "number") {
+            if (numberRegex.test(inputtedValue)) {
+                lastValue = inputtedValue
+            } else {
+                inputtedValue = lastValue
+            }
         }
     }
 
@@ -72,6 +83,14 @@
 </div>
 
 <style lang="scss">
+    .list-practice {
+        background: var(--background-3);
+        border-radius: 15px;
+        padding: 2.5em;
+        color: var(--text-light);
+        width: min(700px, 80vw);
+    }
+
     p {
         text-align: center;
         margin-top: 0;

@@ -1,14 +1,14 @@
-import type { Request } from "@sveltejs/kit";
+import type { RequestEvent } from "@sveltejs/kit";
 import { getSetById } from "$lib/mongo";
 
-export async function get({ params, query }: Request) {
+export async function get({ params, url }: RequestEvent) {
     const { id } = params
     const practiceSet = await getSetById(id)
     if (!practiceSet) return {
         status: 404
     }
 
-    const excludeList = query.get('exclude')?.split(",").map(x => parseInt(x)) || []
+    const excludeList = url.searchParams.get('exclude')?.split(",").map(x => parseInt(x)) || []
     console.log(excludeList)
     const filtered = practiceSet.items.filter(x => !excludeList.includes(x.i))
     console.log("filtered: ")

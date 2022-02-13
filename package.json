@@ -9,9 +9,9 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "devDependencies": {
-    "@sveltejs/adapter-node": "^1.0.0-next.55",
-    "@sveltejs/kit": "next",
-    "@types/jsonwebtoken": "^8.5.5",
+    "@sveltejs/adapter-node": "^1.0.0-next.68",
+    "@sveltejs/kit": "^1.0.0-next.267",
+    "@types/jsonwebtoken": "^8.5.8",
     "sass": "^1.43.4",
     "svelte": "^3.44.1",
     "svelte-check": "^2.2.6",

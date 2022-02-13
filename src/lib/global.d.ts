@@ -27,6 +27,7 @@ export type PracticeSet = {
     topic: Topic,
     type: SetType,
     description: string,
+    etc?: Record<string, any>
     items: SetItem[],
     createdAt: Date,
     updatedAt: Date
@@ -39,4 +40,9 @@ export type UserScore = {
     userId: string,
     score: number,
     createdAt: Date
+}
+
+export type UserData = {
+    username: string,
+    userId: string
 }

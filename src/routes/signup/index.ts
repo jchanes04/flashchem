@@ -1,11 +1,10 @@
 import createNewUser from "$lib/functions/server/createNewUser";
-import type { Request } from "@sveltejs/kit";
-import type { ReadOnlyFormData } from "@sveltejs/kit/types/helper";
+import type { RequestEvent } from "@sveltejs/kit";
 import { addNewUser } from "$lib/mongo";
 import { decryptSignupHash } from "$lib/auth";
 
-export async function get({ query }: Request) {
-    let hash = query.get('hash')
+export async function get({ url }: RequestEvent) {
+    let hash = url.searchParams.get('hash')
     let decrypted = decryptSignupHash(hash)
 
     if (!(decrypted && decrypted.userId && Date.now() - decrypted.time < 600000)) {
@@ -18,11 +17,11 @@ export async function get({ query }: Request) {
     }
 }
 
-export async function post({ body }: Request) {
-    let formData = body as ReadOnlyFormData
-    let username = formData.get('username')
-    let purpose = formData.get('purpose')
-    let decrypted = decryptSignupHash(formData.get('hash'))
+export async function post({ request }: RequestEvent) {
+    const body = await request.formData()
+    let username = body.get('username') as string
+    let purpose = body.get('purpose') as string
+    let decrypted = decryptSignupHash(body.get('hash') as string)
     if (decrypted && decrypted.userId && Date.now() - decrypted.time < 600000) {
         let newUser = createNewUser({ username, userId: decrypted.userId })
         

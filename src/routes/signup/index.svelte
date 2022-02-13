@@ -1,13 +1,12 @@
 <script lang="ts">
-import { page } from "$app/stores";
+    import { page } from "$app/stores";
 
     import SignupForm from "$lib/components/SignupForm.svelte";
-    import { onMount } from "svelte";
 </script>
 
 <main>
     <h1>Account Information</h1>
-    <SignupForm hash={$page.query.get('hash')} />
+    <SignupForm hash={$page.url.searchParams.get('hash')} />
 </main>
 
 <style lang="scss">

@@ -1,14 +1,11 @@
 <script lang="ts">
-    import type { PracticeOptions, PracticeStatistic } from "$lib/client";
+    import type { PracticeStatistic } from "$lib/client";
+    import practiceOptions from "$lib/stores/practiceOptions";
+import practiceStats from "$lib/stores/practiceStats";
     import { createEventDispatcher } from "svelte";
     import LastQuestion from "./LastQuestion.svelte";
 
-    export let score: number
-    export let numberCorrect: number
-    export let practiceStatistics: PracticeStatistic[]
-    export let lastQuestion = null
-    export let practiceOptions: PracticeOptions
-    
+    export let lastQuestion = null    
     const dispatch = createEventDispatcher()
     
 </script>
@@ -18,10 +15,10 @@
     <div class="scores-wrapper">
         <div class="scores">
             <div>
-                <p class="score">{numberCorrect}</p>
+                <p class="score">{$practiceStats.numberCorrect}</p>
                 <p class="units">correct</p>
             </div>
-            {#each practiceStatistics as s}
+            {#each $practiceStats.statistics as s}
                 <div>
                     <p class="score">{s.figure}</p>
                     <p class="units">{s.units}</p>
@@ -36,8 +33,8 @@
     {#if lastQuestion}
         <LastQuestion {lastQuestion} />
     {/if}
-    {#if practiceOptions.postScore}
-        <p>Your score of {score.toFixed(1)} has been posted to the scoreboards</p>
+    {#if $practiceOptions.postScore}
+        <p>Your score of {$practiceStats.score.toFixed(1)} has been posted to the scoreboards</p>
     {/if}
     <div class="buttons">
         <button class="primary" on:click={() => dispatch("playAgain")}>Play Again</button>

@@ -1,33 +1,32 @@
-import type { Request, Response } from "@sveltejs/kit";
+import type { RequestEvent } from "@sveltejs/kit";
 import { getUserFromToken } from "$lib/auth";
 import { init } from '$lib/mongo'
-type Resolve = (request: Request<Record<string, any>>) => Response | Promise<Response>
+type Resolve = (event: RequestEvent) => Promise<Response>
 
 init()
 
-const authenticatedEndpoints = ["account", "score"]
+const authenticatedEndpoints = ["/account", "/score"]
 
-export async function handle({ request, resolve }: { request: Request, resolve: Resolve }) {
-    let endpoint = request.path.split("/")[1]
-    let authToken = request.headers.cookie?.split("; ").find(x => x.split("=")[0] === "authToken")?.split("=")[1]
-    if (authToken) request.headers.authorization = authToken
+export async function handle({ event, resolve }: { event: RequestEvent, resolve: Resolve }) {
+    let authToken = event.request.headers.get('cookie')?.split("; ").find(x => x.split("=")[0] === "authToken")?.split("=")[1]
+    if (authToken) event.request.headers.set('authorization', authToken)
 
-    if (authenticatedEndpoints.includes(endpoint)) {
-        let authenticated = !!(await getUserFromToken(request.headers.authorization))
+    if (authenticatedEndpoints.some(e => event.url.pathname.startsWith(e))) {
+        let authenticated = !!(await getUserFromToken(event.request.headers.get('authorization')))
         if (!authenticated) 
-            return {
+            return new Response(null, {
                 status: 302,
                 headers: {
                     'Location': '/auth/google'
                 }
-            }
+            })
     }
 
-    return resolve(request)
+    return resolve(event)
 }
 
-export async function getSession(request: Request) {
-    let user = await getUserFromToken(request.headers.authorization)
+export async function getSession({ request }: RequestEvent) {
+    let user = await getUserFromToken(request.headers.get('Authorization'))
     if (user) 
         return {
             loggedIn: true,

@@ -11,7 +11,6 @@ const config = {
 	kit: {
 		// hydrate the <div id="svelte"> element in src/app.html
 		adapter: node(),
-		target: '#svelte',
 		files: {
 			lib: 'src/lib'
 		},

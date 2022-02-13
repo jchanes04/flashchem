@@ -4,7 +4,7 @@
 
     import type { SetItem } from "$lib/global";
     import { createEventDispatcher, onMount } from "svelte";
-    import PeriodicTableInput from "./PeriodicTableInput.svelte";
+    import PeriodicTableInput from "../PeriodicTableInput.svelte";
 
     export let currentQuestion: SetItem
     export let showSkip: boolean
@@ -38,14 +38,40 @@
 </script>
 
 <div class="place-practice">
-    <p class={getTextSizeClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
-    {#if showSkip}
-        <p class="skip" class:disabled={skipDisabled} on:click={handleSkip}>Skip question</p>
-    {/if}
+    <div class="question">
+        <p class={getTextSizeClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
+        {#if showSkip}
+            <p class="skip" class:disabled={skipDisabled} on:click={handleSkip}>Skip question</p>
+        {/if}
+    </div>
     <PeriodicTableInput on:answer={handleAnswer} />
 </div>
 
 <style lang="scss">
+    .place-practice {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin-top: 3em;
+        height: calc(100% - 110px - 3em);
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        place-content: center;
+    }
+
+    .question {
+        background: var(--background-3);
+        border-radius: 15px;
+        padding: 1em 5em;
+        color: var(--text-light);
+        max-height: 60vh;
+        width: min-content;
+        margin: auto;
+    }
+
     p {
         text-align: center;
         margin: 0;
@@ -66,6 +92,7 @@
         margin-top: 1em;
         margin-bottom: 0.5em;
         text-decoration: underline;
+        white-space: nowrap;
         cursor: pointer;
         user-select: none;
     }

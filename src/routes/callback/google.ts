@@ -1,10 +1,10 @@
 import { generateSignupHash, generateToken, oauth2client } from "$lib/auth";
-import type { Request } from "@sveltejs/kit";
+import type { RequestEvent } from "@sveltejs/kit";
 import type { oauth2_v2 } from "googleapis";
 import { getUserData } from "$lib/mongo";
 
-export async function get({ query }: Request) {
-    let code = query.get('code')
+export async function get({ url }: RequestEvent) {
+    let code = url.searchParams.get('code')
     if (code) {
         const { tokens } = await oauth2client.getToken(code)
         oauth2client.setCredentials(tokens)

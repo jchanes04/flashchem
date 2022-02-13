@@ -1,12 +1,12 @@
 <script lang="ts">
-import type { PtableElementInfo } from "$lib/client";
+    import type { PtableElementInfo } from "$lib/client";
 
     import elements from "$lib/functions/client/periodicTableElements"
     import { createEventDispatcher } from "svelte";
     import PeriodicTableElement from "./PeriodicTableElement.svelte";
 
     export let showFBlock = false
-    export let defaultFontSize = 20
+    export let defaultFontSize = window.innerWidth / 50
 
     const dispatch = createEventDispatcher()
 
@@ -19,7 +19,7 @@ import type { PtableElementInfo } from "$lib/client";
 
     function createAnswerHandler(e: PtableElementInfo) {
         return () => {
-            if (!clickDisabled) {
+            if (!clickDisabled && !dragging) {
                 dispatch('answer', { selectedElement: e.atomicNumber })
                 clickDisabled = true
                 setTimeout(() => {
@@ -30,72 +30,85 @@ import type { PtableElementInfo } from "$lib/client";
     }
 
     type Position = { x: number, y: number }
+    let startMousePos: Position = null
     let mousePos: Position = null
+    let dragging = false
     let inputWrapperElement: HTMLElement
 
     function handleMousedown(e: MouseEvent) {
         mousePos = { x: e.clientX, y: e.clientY }
+        startMousePos = { x: e.clientX, y: e.clientY }
 
         inputWrapperElement.addEventListener('mousemove', handleMousemove)
-        inputWrapperElement.addEventListener('mouseup', handleMouseup)
+        window.addEventListener('mouseup', handleMouseup)
     }
 
     function handleMousemove(e: MouseEvent) {
         const dx = e.clientX - mousePos.x
         const dy = e.clientY - mousePos.y
 
+        dragging = dragging || getDist(startMousePos, mousePos) > 50
+
         inputWrapperElement.scrollLeft -= dx
         inputWrapperElement.scrollTop -= dy
         
         mousePos = { x: e.clientX, y: e.clientY }
-
-        inputWrapperElement.style.cursor = "grabbing"
     }
 
     function handleMouseup() {
         mousePos = null
-
-        inputWrapperElement.style.cursor = "default"
+        setTimeout(() => {
+            dragging = false
+        }, 50)
 
         inputWrapperElement.removeEventListener('mousemove', handleMousemove)
-        inputWrapperElement.removeEventListener('mouseup', handleMouseup)
+        window.removeEventListener('mouseup', handleMouseup)
+    }
+
+    function getDist(p1: Position, p2: Position) {
+        return Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
     }
 </script>
 
 <div class="outer-wrapper">
     <div class="input-wrapper" style="--ptable-font-size: {ptableFontSize}px"
-        bind:this={inputWrapperElement} on:mousedown={handleMousedown}>
+        bind:this={inputWrapperElement} class:dragging on:mousedown={handleMousedown}>
         <div class="periodic-table-input" class:f-block={showFBlock}>
             {#each elementsShown as e}
-                <PeriodicTableElement {...e} on:click={createAnswerHandler(e)} {clickDisabled} />
+                <PeriodicTableElement {...e} on:click={createAnswerHandler(e)} {clickDisabled} {dragging} />
             {/each}
         </div>
     </div>
     <div class="buttons">
-        <button on:click={() => ptableFontSize *= 1.15}>+</button>
-        <button on:click={() => ptableFontSize /= 1.15}>-</button>
+        <button on:click={() => ptableFontSize *= 1.07}>+</button>
+        <button on:click={() => ptableFontSize /= 1.07}>-</button>
     </div>
 </div>
 
 <style lang="scss">
     .outer-wrapper {
-        position: relative;
-        width: 100%;
-        height: 40vh;
+        max-width: 100vw;
+        overflow: hidden;
     }
-    
+
     .input-wrapper {
         overflow: auto;
         overscroll-behavior: contain;
+        max-height: 100%;
     }
 
     .periodic-table-input {
+        margin: auto;
         display: grid;
         grid-template-rows: repeat(7, 1fr);
         grid-template-columns: repeat(18, 1fr);
         color: var(--text-light);
         width: min-content;
         padding: 2em;
+    }
+
+    .dragging :global(*) {
+        cursor: grabbing !important;
     }
 
     .f-block {

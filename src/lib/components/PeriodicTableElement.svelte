@@ -1,9 +1,13 @@
 <script lang="ts">
+    import { createEventDispatcher } from "svelte";
+
     export let atomicNumber: string
     export let symbol: string
     export let atomicMass: string
     export let gridX: number
     export let gridY: number
+    export let clickDisabled = false
+    export let dragging = false
     export let options: {
         hideAtomicNumber: boolean,
         hideSymbol: boolean,
@@ -13,12 +17,14 @@
         hideSymbol: false,
         hideAtomicMass: false
     }
-    export let clickDisabled = false
 
     let selected = false
 
+    const dispatch = createEventDispatcher()
+
     function handleClick() {
-        if (!clickDisabled) {
+        dispatch('click')
+        if (!clickDisabled && !dragging) {
             selected = true
             setTimeout(() => {
                 selected = false
@@ -27,7 +33,7 @@
     }
 </script>
 
-<div class="ptable-element" style="grid-column-start: {gridX}; grid-row-start: {gridY}"
+<div class="ptable-element" class:dragging style="grid-column-start: {gridX}; grid-row-start: {gridY}"
     on:click={handleClick} class:selected>
     <p class="atomic-number" class:hidden={options.hideAtomicNumber}>{atomicNumber}</p>
     <p class="atomic-symbol" class:hidden={options.hideSymbol}>{symbol}</p>
@@ -46,15 +52,19 @@
         user-select: none;
     }
 
-    .ptable-element:hover {
+    .ptable-element:hover:not(.dragging) {
         background-color: rgba(255,255, 255, 0.1);
 
         &.selected {
             background-color: transparentize(#B83D49, 0.6);
+
+            .atomic-symbol {
+                color: #51B6F5; 
+            }
         }
     }
 
-    .ptable-element:hover .atomic-symbol {
+    .ptable-element:hover:not(.dragging) .atomic-symbol {
         color: #51B6F5;
     }
 
@@ -77,6 +87,10 @@
 
     .selected {
         background-color: transparentize(#B83D49, 0.6);
+        
+        .atomic-symbol {
+            color: #51B6F5;
+        }
     }
 
     .hidden {

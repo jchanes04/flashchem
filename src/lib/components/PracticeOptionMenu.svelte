@@ -8,7 +8,7 @@
     import { session } from '$app/stores';
     import { createEventDispatcher, tick } from 'svelte';
     import SelectedSet from './SelectedSet.svelte';
-import type { PracticeMode } from '$lib/global';
+    import type { PracticeMode } from '$lib/global';
 
     const groupBy = item => item.difficulty
     async function handleSelect(e) {

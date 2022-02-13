@@ -1,10 +1,7 @@
 <script lang="ts">
-    import type { SetInfo } from "$lib/client";
-
+    import practiceOptions from "$lib/stores/practiceOptions";
     import { createEventDispatcher } from "svelte";
     import TimedPracticeToolbar from "./TimedPracticeToolbar.svelte";
-
-    export let setInfo: SetInfo
 
     const dispatch = createEventDispatcher()
     
@@ -21,7 +18,7 @@
 
 <div class="streak-practice">
     <slot></slot>
-    <TimedPracticeToolbar {time} {setInfo} on:exitPractice={handleExit} />
+    <TimedPracticeToolbar {time} setInfo={$practiceOptions.selectedSet} on:exitPractice={handleExit} />
 </div>
 
 <style lang="scss">

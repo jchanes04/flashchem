@@ -17,82 +17,74 @@
 
 <script lang="ts">
     import { page, session } from "$app/stores";
-    import ListPractice from "$lib/components/ListPractice.svelte";
     import NotLoggedIn from "$lib/components/NotLoggedIn.svelte";
     import PracticeOptionMenu from "$lib/components/PracticeOptionMenu.svelte";
     import { onMount } from "svelte";
-    import type { LastQuestionData, NextQuestionResponse, PracticeOptions, PracticeStatistic, SetInfo } from "$lib/client";
+    import type { LastQuestionData, NextQuestionResponse, PracticeOptions, PracticeState, PracticeStatistic, SetInfo } from "$lib/client";
     import type { PracticeLength, SetItem } from "$lib/global";
-    import TimedPractice from "$lib/components/PracticeHandlers/TimedPractice.svelte";
     import PracticeResults from "$lib/components/PracticeResults.svelte";
-    import FixedQuestionPractice from "$lib/components/PracticeHandlers/FixedQuestionPractice.svelte";
-    import InfinitePractice from "$lib/components/PracticeHandlers/InfinitePractice.svelte";
-    import StreakPractice from "$lib/components/PracticeHandlers/StreakPractice.svelte";
     import type { PracticeSet } from "$lib/global";
     import getNextQuestion from "$lib/functions/client/getNextQuestion";
     import numberToTime from "$lib/functions/client/numberToTime";
     import sendScores from "$lib/functions/client/sendScores";
     import { calculateFixedQuestionScore, calculateStreakScore, calculateTimedScore } from "$lib/functions/client/calculateScore";
-    import PlacePractice from "$lib/components/PlacePractice.svelte";
+    import practiceOptions from "$lib/stores/practiceOptions";
+    import practiceStats from "$lib/stores/practiceStats";
+    import { FixedQuestionPractice, InfinitePractice, ListPractice, PlacePractice, StreakPractice, TimedPractice } from '$lib/components/PracticeHandlers/practiceHandlers'
 
-    export let confirmed = undefined
-    let practicing = false
+    export let practiceState: PracticeState = $session.loggedIn? "options" : "loading"
 
     let setData: PracticeSet = null
     let error: string = null
 
-    let setInfo: SetInfo = null
-    let options: PracticeOptions = null
-
     let exclude: number[] = []
     let currentQuestion: SetItem = null
 
-    let numberCorrect = 0
-    let score = 0
-    // let modeScore: ModeScore = null
-    let practiceStatistics: PracticeStatistic[] = []
-    let questionNumber = 1
     let lastQuestionData: LastQuestionData = null
 
     let scoreSubmitError = null
 
     let timerInterval = null
 
-    $: PracticeComponent = setInfo?.type === "list" ? ListPractice
-        : setInfo?.type === "place"
+    $: PracticeComponent = $practiceOptions?.selectedSet.type === "list" ? ListPractice
+        : $practiceOptions?.selectedSet.type === "place"
             ? PlacePractice
             : ListPractice
 
 
     onMount(() => {
-        confirmed = localStorage.getItem('dontShowLoginPrompt') === 'true'
+        if (localStorage.getItem('dontShowLoginPrompt') === 'true') {
+            practiceState = "options"
+        } else {
+            practiceState = "login-prompt"
+        }
     })
 
     async function onStart(e: CustomEvent<PracticeOptions>) {
-        console.dir($session)
-        options = e.detail
-        setInfo = options.selectedSet
-        history.pushState({}, '', '/practice/?set=' + options.selectedSet.id)
+        $practiceOptions = e.detail
+        history.pushState({}, '', '/practice/?set=' + $practiceOptions.selectedSet.id)
         
-        const setDataRes = await fetch('/api/set/' + options.selectedSet.id)
+        const setDataRes = await fetch('/api/set/' + $practiceOptions.selectedSet.id)
         const setDataValue = await setDataRes.json()
         
         if (setDataValue) {
             setData = setDataValue
-            numberCorrect = 0
-            questionNumber = 1
+            $practiceStats = {
+                numberCorrect: 0,
+                questionNumber: 1
+            }
 
             const { nextQuestion, newExclude } = getNextQuestion(setData.items, [])
             currentQuestion = nextQuestion
             exclude = newExclude
 
-            practicing = true
+            practiceState = "practicing"
         }
     }
 
     async function handleCorrect() {
-        numberCorrect++
-        questionNumber++
+        $practiceStats.numberCorrect++
+        $practiceStats.questionNumber++
         
         const { nextQuestion, newExclude } = getNextQuestion(setData.items, exclude)
         exclude = newExclude
@@ -100,7 +92,7 @@
     }
 
     async function handleSkip() {
-        questionNumber++
+        $practiceStats.questionNumber++
         
         const { nextQuestion, newExclude } = getNextQuestion(setData.items, exclude)
         exclude = newExclude
@@ -108,37 +100,37 @@
     }
 
     async function handleEnd(e?: CustomEvent<{ practiceLength: number, lastQuestion?: LastQuestionData }>) {
-        practicing = false
+        practiceState = "results"
         clearInterval(timerInterval)
 
         const { practiceLength, lastQuestion } = e.detail
 
-        if (options.practiceMode === "timed") {
-            practiceStatistics = [{
-                figure: (numberCorrect / practiceLength).toFixed(2),
+        if ($practiceOptions.practiceMode === "timed") {
+            $practiceStats.statistics = [{
+                figure: ($practiceStats.numberCorrect / practiceLength).toFixed(2),
                 units: "questions / second"
             }]
-            score = calculateTimedScore(practiceLength, numberCorrect)
+            $practiceStats.score = calculateTimedScore(practiceLength, $practiceStats.numberCorrect)
             
-            if (options.postScore)
-                scoreSubmitError = await sendScores(score, $session.userData.userId, options, <PracticeLength<"timed">>practiceLength)
-        } else if (options.practiceMode === "fixed-questions") {
-            practiceStatistics = [{
-                figure: (numberCorrect / practiceLength).toFixed(2),
+            if ($practiceOptions.postScore)
+                scoreSubmitError = await sendScores($practiceStats.score, $session.userData.userId, $practiceOptions, <PracticeLength<"timed">>practiceLength)
+        } else if ($practiceOptions.practiceMode === "fixed-questions") {
+            $practiceStats.statistics = [{
+                figure: ($practiceStats.numberCorrect / practiceLength).toFixed(2),
                 units: "questions / second"
             }]
-            score = calculateFixedQuestionScore(practiceLength, numberCorrect)
+            $practiceStats.score = calculateFixedQuestionScore(practiceLength, $practiceStats.numberCorrect)
             
-            if (options.postScore)
-                scoreSubmitError = await sendScores(score, $session.userData.userId, options, <PracticeLength<"fixed-questions">>practiceLength)
-        } else if (options.practiceMode === "infinite") {
-            practiceStatistics = [
+            if ($practiceOptions.postScore)
+                scoreSubmitError = await sendScores($practiceStats.score, $session.userData.userId, $practiceOptions, <PracticeLength<"fixed-questions">>practiceLength)
+        } else if ($practiceOptions.practiceMode === "infinite") {
+            $practiceStats.statistics = [
                 {
-                    figure: (100 * numberCorrect / (questionNumber - 1)).toFixed(1),
+                    figure: (100 * $practiceStats.numberCorrect / ($practiceStats.questionNumber - 1)).toFixed(1),
                     units: "% correct"
                 },
                 {
-                    figure: (numberCorrect / practiceLength).toFixed(2),
+                    figure: ($practiceStats.numberCorrect / practiceLength).toFixed(2),
                     units: "questions / second"
                 },
                 {
@@ -146,16 +138,16 @@
                     units: practiceLength > 150 ? "minutes long" : "seconds long" 
                 }
             ]
-        } else if (options.practiceMode === "streak") {
-            practiceStatistics = [{
-                figure: (100 * numberCorrect / questionNumber).toFixed(1),
+        } else if ($practiceOptions.practiceMode === "streak") {
+            $practiceStats.statistics = [{
+                figure: (100 * $practiceStats.numberCorrect / $practiceStats.questionNumber).toFixed(1),
                 units: "% correct"
             }]
-            score = calculateStreakScore(practiceLength, numberCorrect)
-            lastQuestionData = lastQuestion
+            $practiceStats.score = calculateStreakScore(practiceLength, $practiceStats.numberCorrect)
+            $practiceStats.lastQuestion = lastQuestion
             
-            if (options.postScore)
-                scoreSubmitError = await sendScores(score, $session.userData.userId, options, "streak")
+            if ($practiceOptions.postScore)
+                scoreSubmitError = await sendScores($practiceStats.score, $session.userData.userId, $practiceOptions, "streak")
         }
     }
 
@@ -164,57 +156,55 @@
         currentQuestion = nextQuestion
         exclude = newExclude
         
-        numberCorrect = 0
-        questionNumber = 1
-        practiceStatistics = []
+        $practiceStats = {
+            numberCorrect: 0,
+            questionNumber: 1
+        }
         exclude = []
-        practicing = true
+        practiceState = "practicing"
     }
 
     async function handleBackToOptions() {
         currentQuestion = null
         error = null
-        setInfo = null
-        options = null
+        $practiceOptions = null
         exclude = []
-        practiceStatistics = []
     }
 </script>
 
 <main>
-    {#if confirmed === undefined}
+    {#if practiceState === "loading"}
         <div></div>
-    {:else if !confirmed && !$session.loggedIn}
-        <NotLoggedIn on:continue={() => {confirmed = true}} />
+    {:else if practiceState === "login-prompt"}
+        <NotLoggedIn on:continue={() => {practiceState = "options"}} />
     {:else if currentQuestion === null}
         <PracticeOptionMenu on:start={onStart} />
-    {:else if error}
+    {:else if practiceState === "error"}
         <p>Set not found</p>
-    {:else if practicing}
-        {#if options.practiceMode === "timed"}
-            <TimedPractice {setInfo} {options} on:timeEnd={handleEnd} on:exitPractice={handleEnd}>
+    {:else if practiceState === "practicing"}
+        {#if $practiceOptions.practiceMode === "timed"}
+            <TimedPractice on:timeEnd={handleEnd} on:exitPractice={handleEnd}>
                 <svelte:component this={PracticeComponent} {currentQuestion}
                     on:correct={handleCorrect} />
             </TimedPractice>
-        {:else if options.practiceMode === "fixed-questions"}
-            <FixedQuestionPractice {setInfo} {options} {questionNumber} on:practiceEnd={handleEnd}>
+        {:else if $practiceOptions.practiceMode === "fixed-questions"}
+            <FixedQuestionPractice on:practiceEnd={handleEnd}>
                 <svelte:component this={PracticeComponent} {currentQuestion} showSkip
                     on:correct={handleCorrect} on:skip={handleSkip} />
             </FixedQuestionPractice>
-        {:else if options.practiceMode === "infinite"}
-            <InfinitePractice {setInfo} on:practiceEnd={handleEnd}>
+        {:else if $practiceOptions.practiceMode === "infinite"}
+            <InfinitePractice on:practiceEnd={handleEnd}>
                 <svelte:component this={PracticeComponent} {currentQuestion} showSkip
                     on:correct={handleCorrect} on:skip={handleSkip} />
             </InfinitePractice>
-        {:else if options.practiceMode === "streak"}
-            <StreakPractice {setInfo} on:practiceStart={(e) => {timerInterval = e.detail.timerInterval}} on:practiceEnd={handleEnd}>
+        {:else if $practiceOptions.practiceMode === "streak"}
+            <StreakPractice on:practiceStart={(e) => {timerInterval = e.detail.timerInterval}} on:practiceEnd={handleEnd}>
                 <svelte:component this={PracticeComponent} {currentQuestion} showNext
                     on:correct={handleCorrect} on:skip={handleSkip} on:incorrect={handleEnd} />
             </StreakPractice>
         {/if}
-    {:else}
-        <PracticeResults {numberCorrect} {score} {practiceStatistics} practiceOptions={options}
-            on:playAgain={handlePlayAgain} on:backToOptions={handleBackToOptions} lastQuestion={lastQuestionData} />
+    {:else if practiceState === "results"}
+        <PracticeResults on:playAgain={handlePlayAgain} on:backToOptions={handleBackToOptions} lastQuestion={$practiceStats.lastQuestion} />
     {/if}
 </main>
 
@@ -224,5 +214,6 @@
         height: 100%;
         display: grid;
         place-content: center;
+        position: relative;
     }
 </style>

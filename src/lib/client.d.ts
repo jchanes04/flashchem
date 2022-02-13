@@ -2,12 +2,22 @@ import type { Difficulty, PracticeSet, SetItem, Topic, Type, Optional } from "./
 
 export type SetInfo = Optional<Omit<PracticeSet, 'items'>, 'createdAt' | 'updatedAt'>
 
+export type PracticeState = "loading" | "login-prompt" | "options" | "error" | "practicing" | "results"
+
 export type PracticeOptions = {
     selectedSet: SetInfo & { isGroupItem: boolean },
     practiceMode: PracticeMode,
     practiceTime?: number,
     practiceQuestions?: number,
     postScore: boolean
+}
+
+export type PracticeStats = {
+    questionNumber: number,
+    numberCorrect: number,
+    score?: number,
+    statistics?: PracticeStatistic[],
+    lastQuestion?: LastQuestionData
 }
 
 export type NextQuestionResponse = {

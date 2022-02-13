@@ -1,6 +1,6 @@
 import type { UserBase } from '$lib/server';
 import { Collection, Db, MongoClient, Document, FindCursor } from 'mongodb'
-import type { PracticeSet, UserScore } from '$lib/global';
+import type { PracticeSet, UserData, UserScore } from '$lib/global';
 import env from '$lib/env';
 
 
@@ -40,7 +40,7 @@ function queryWrapper<X extends any[], R>(func: (...args: X) => R): (...args: X)
 }
 
 export const getUserData = queryWrapper(async (userId: string) => {
-    return remove_id(userData.findOne({ userId })) as Promise<UserBase>
+    return remove_id(userData.findOne({ userId })) as Promise<UserData>
 })
 
 export const usernameTaken = queryWrapper(async (username: string) => {
@@ -80,5 +80,5 @@ async function remove_id<T>(document: Document | Promise<Document>): Promise<T> 
     if (!resolved) return null
 
     const {_id, ...output} = resolved
-    return output
+    return output as T
 }

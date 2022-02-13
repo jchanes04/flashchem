@@ -1,23 +1,20 @@
 <script lang="ts">
-    import type { PracticeOptions, SetInfo } from "$lib/client";
+    import practiceOptions from "$lib/stores/practiceOptions";
+    import practiceStats from "$lib/stores/practiceStats"
 
     import { createEventDispatcher } from "svelte";
     import FixedQuestionPracticeToolbar from "./FixedQuestionPracticeToolbar.svelte";
 
-    export let setInfo: SetInfo
-    export let options: PracticeOptions
-    export let questionNumber: number
-
     const dispatch = createEventDispatcher()
     
-    let totalQuestions = options.practiceQuestions
+    let totalQuestions = $practiceOptions.practiceQuestions
     let practiceLength = 1
 
     const timingInterval = setInterval(() => {
         practiceLength++
     }, 1000)
 
-    $: if (questionNumber > totalQuestions) {
+    $: if ($practiceStats.questionNumber > totalQuestions) {
         clearInterval(timingInterval)
         dispatch('practiceEnd', { practiceLength })
     }
@@ -25,16 +22,10 @@
 
 <div class="fixed-question-practice">
     <slot></slot>
-    <FixedQuestionPracticeToolbar {setInfo} {questionNumber} {totalQuestions}
+    <FixedQuestionPracticeToolbar setInfo={$practiceOptions.selectedSet} questionNumber={$practiceStats.questionNumber} {totalQuestions}
         on:exitPractice={() => dispatch('practiceEnd', { practiceLength })} />
 </div>
 
 <style lang="scss">
-    .fixed-question-practice {
-        background: var(--background-3);
-        border-radius: 15px;
-        padding: 2.5em;
-        color: var(--text-light);
-        width: min(700px, 80vw);
-    }
+    
 </style>
