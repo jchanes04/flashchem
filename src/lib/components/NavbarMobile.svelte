@@ -10,30 +10,25 @@
             menuOpen = false
         }
     }
-
-    function logout() {
-        goto('/logout')
-    }
 </script>
 
 <svelte:window on:click={windowClickHandler}></svelte:window>
 
 <div class="navbar">
-    <div class="logo">
+    <a class="logo" href="/">
         <div class="logo-image"></div>
         <h1>FlashChem</h1>
-    </div>
+    </a>
     <div class="menu-wrapper" bind:this={menuWrapperElement}>
         <div class="icon" on:click={() => menuOpen = !menuOpen}></div>
         <nav class:visible={menuOpen}>
-            <a href="/">Home</a>
-            <a href="/practice">Practice</a>
-            <a href="/about">About</a>
-            <a href="/account" style="padding-right: 0">Account</a>
+            <a href="/practice"><div class="link-wrapper">Practice</div></a>
+            <a href="/sets"><div class="link-wrapper">View Sets</div></a>
             {#if $session.loggedIn}
-                <a href="/" on:click={logout}>Logout</a>
+                <a href="/account"><div class="link-wrapper">My Account</div></a>
+                <a href="/logout" rel="external"><div class="link-wrapper">Logout</div></a>
             {:else}
-                <a href="/auth/google">Login</a>
+                <a href="/auth/google" rel="external"><div class="link-wrapper">Login</div></a>
             {/if}
         </nav>
     </div>
@@ -51,6 +46,7 @@
         flex-direction: row;
         align-items: center;
         padding: 10px;
+        z-index: 5;
     }
 
     .logo {
@@ -105,6 +101,7 @@
         opacity: 0;
         visibility: hidden;
         transition: opacity linear 0.1s;
+        z-index: 5;
 
         &.visible {
             opacity: 1;
@@ -115,9 +112,28 @@
             font-size: 20px;
             font-weight: 500;
             padding: 0.2em 0.2em;
+            display: inline-block;
 
             &:hover {
-                color: var(--emph);
+                .link-wrapper::after {
+                    left: 0;
+                }
+            }
+            
+            .link-wrapper {
+                overflow: hidden;
+                position: relative;
+
+                &::after {
+                    content: '';
+                    width: 100%;
+                    height: 3px;
+                    background-color: var(--text-dark);
+                    position: absolute;
+                    bottom: -0.05em;
+                    left: -100%;
+                    transition: left 0.15s ease-out;
+                };
             }
         }
     }

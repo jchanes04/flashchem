@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import { session } from '$app/stores';
+    import DownArrow from '$lib/assets/DownArrow.svelte'
 
     let accountMenuOpen = false
     let accountWrapperElement: HTMLElement
@@ -10,34 +10,34 @@
             accountMenuOpen = false
         }
     }
-
-    function logout() {
-        goto('/logout')
-    }
 </script>
 
 <svelte:window on:click={windowClickHandler}></svelte:window>
 
 <div class="navbar">
-    <div class="logo">
+    <a class="logo" href="/">
         <div class="logo-image"></div>
         <h1>FlashChem</h1>
-    </div>
+    </a>
     <nav>
-        <a href="/"><div class="link-wrapper">Home</div></a>
         <a href="/practice" rel="external"><div class="link-wrapper">Practice</div></a>
-        <a href="/about"><div class="link-wrapper">About</div></a>
-        <a href="/account"><div class="link-wrapper">Account</div></a>
+        <a href="/sets"><div class="link-wrapper">View Sets</div></a>
     </nav>
     {#if $session.loggedIn}
         <div class="account-wrapper" bind:this={accountWrapperElement}>
-            <div class="icon" on:click={() => accountMenuOpen = !accountMenuOpen}></div>
+            <div class="icon-wrapper">
+                <div class="icon" on:click={() => accountMenuOpen = !accountMenuOpen}></div>
+                <span class="down-arrow" on:click={() => accountMenuOpen = !accountMenuOpen}>
+                    <DownArrow />
+                </span>
+            </div>
             <div class="account-menu" class:visible={accountMenuOpen}>
-                <a href="/" on:click={logout}>Logout</a>
+                <a href="/account"><div class="link-wrapper">My Account</div></a>
+                <a href="/logout" rel="external"><div class="link-wrapper">Logout</div></a>
             </div>
         </div>
     {:else}
-        <a href="/auth/google">Login</a>
+        <a href="/auth/google" rel="external"><div class="link-wrapper">Login</div></a>
     {/if}
 </div>
 
@@ -53,6 +53,7 @@
         flex-direction: row;
         align-items: center;
         padding: 10px 20px;
+        z-index: 5;
     }
 
     .logo {
@@ -70,6 +71,12 @@
         display: inline-block;
     }
 
+    .icon-wrapper {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
     .icon {
         cursor: pointer;
         width: 50px;
@@ -79,13 +86,28 @@
         display: inline-block;
     }
 
+    .down-arrow {
+        width: 1.65em;
+        height: 1.65em;
+        display: inline-block;
+        vertical-align: middle;
+        position: relative;
+        top: 0.25em;
+        cursor: pointer;
+        padding-left: 0.2em;
+
+        :global(*) {
+            height: 100%;
+        }
+    }
+
     .account-wrapper {
         position: relative;
     }
 
     .account-menu {
         position: absolute;
-        top: calc(1em + 50px);
+        top: calc(1em + 45px);
         right: 0em;
         background: var(--background-2);
         padding: 0.5em;
@@ -96,6 +118,12 @@
         &.visible {
             opacity: 1;
             visibility: visible;
+        }
+
+        a {
+            font-size: 22px;
+            padding: 0.3em 0.4em;
+            white-space: nowrap;
         }
     }
 
@@ -119,10 +147,10 @@
     }
 
     a {
+        display: inline-block;
         font-size: 28px;
         font-weight: 500;
         padding: 0.5em 0.3em;
-        transition: color 0.1s linear;
 
         &:hover {
             .link-wrapper::after {
