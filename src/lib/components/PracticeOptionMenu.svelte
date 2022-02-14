@@ -168,6 +168,7 @@
         max-height: 70vh;
         overflow-y: auto;
         overflow-x: hidden;
+        box-sizing: border-box;
     }
 
     h1 {
@@ -318,10 +319,19 @@
         }
     }
 
-    @media (max-width: 500px) {
+    @media (max-width: 650px) {
+        #practice-options {
+            width: 90vw;
+        }
+
+        h2 {
+            margin-left: 0.75em;
+        }
+
         .select-wrapper {
             width: 100%;
             font-size: 14px;
+            margin-left: 0;
         }
 
         .slider {

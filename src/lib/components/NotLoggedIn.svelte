@@ -16,7 +16,7 @@
 
 <div id="not-logged-in">
     <h1>Log in to save your scores</h1>
-    <button class="primary" on:click={() => goto('/auth/google')}>Sign in to FlashChem</button>
+    <a href="/auth/google" rel="external"><button class="primary">Sign in to FlashChem</button></a>
     <button class="secondary" on:click={handleContinue}>Continue Anonymously</button>
     <br />
     <label for="dont-ask-again">
@@ -46,7 +46,7 @@
         font-size: 24px;
         font-weight: 600;
         border: none;
-        margin: 0 0.5em;
+        margin: 0 0.5em 1em;
         padding: 0.5em 1em;
         color: var(--text-dark);
         cursor: pointer;
@@ -70,7 +70,6 @@
 
     label {
         cursor: pointer;
-        margin-top: 1em;
         display: block;
         font-size: 16px;
         color: var(--text-light);

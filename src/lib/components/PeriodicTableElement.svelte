@@ -8,6 +8,7 @@
     export let gridY: number
     export let clickDisabled = false
     export let dragging = false
+    export let delay
     export let options: {
         hideAtomicNumber: boolean,
         hideSymbol: boolean,
@@ -28,7 +29,7 @@
             selected = true
             setTimeout(() => {
                 selected = false
-            }, 500)
+            }, delay)
         }
     }
 </script>

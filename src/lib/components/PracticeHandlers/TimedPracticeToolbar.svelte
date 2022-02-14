@@ -17,7 +17,7 @@
 </script>
 
 <div class="practice-toolbar">
-    <div class="left">{setInfo.name}</div>
+    <div class="left"><span>{setInfo.name}</span></div>
     <div class="time">{numberToTime(time)}</div>
     <div class="right" style="">
         <span>{uppercaseWords(setInfo.difficulty)}</span>
@@ -53,13 +53,19 @@
 
     .left {
         font-size: 24px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        min-width: 0;
+
+        span {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            display: inline-block;
+        }
     }
 
     .time {
         font-size: 48px;
+        margin: 0 0.5em;
     }
 
     .right {
@@ -80,6 +86,46 @@
 
         :global(svg) {
             height: 100%;
+        }
+    }
+
+    @media (max-width: 950px) {
+        .left {
+            font-size: 18px;
+        }
+
+        .time {
+            font-size: 36px;
+        }
+
+        .right {
+            font-size: 14px;
+            gap: 0.5em;
+            
+            > * {
+                white-space: nowrap;
+            }
+        }
+    }
+
+    @media (max-width: 650px) {
+        .practice-toolbar {
+            width: calc(100% - 5vw);
+            left: 2.5vw;
+            grid-template-columns: 1fr auto 1fr;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            color: var(--text-light);
+            padding: 0.5em 1em;
+            box-sizing: border-box;
+        }
+
+        .right :not(.icon) {
+            display: none;
+        }
+
+        .left span {
+            display: none;
         }
     }
 </style>

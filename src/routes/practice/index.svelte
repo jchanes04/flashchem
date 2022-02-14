@@ -16,11 +16,11 @@
 </script>
 
 <script lang="ts">
-    import { page, session } from "$app/stores";
+    import { session } from "$app/stores";
     import NotLoggedIn from "$lib/components/NotLoggedIn.svelte";
     import PracticeOptionMenu from "$lib/components/PracticeOptionMenu.svelte";
     import { onMount } from "svelte";
-    import type { LastQuestionData, NextQuestionResponse, PracticeOptions, PracticeState, PracticeStatistic, SetInfo } from "$lib/client";
+    import type { LastQuestionData, PracticeOptions, PracticeState } from "$lib/client";
     import type { PracticeLength, SetItem } from "$lib/global";
     import PracticeResults from "$lib/components/PracticeResults.svelte";
     import type { PracticeSet } from "$lib/global";
@@ -32,7 +32,7 @@
     import practiceStats from "$lib/stores/practiceStats";
     import { FixedQuestionPractice, InfinitePractice, ListPractice, PlacePractice, StreakPractice, TimedPractice } from '$lib/components/PracticeHandlers/practiceHandlers'
 
-    export let practiceState: PracticeState = $session.loggedIn? "options" : "loading"
+    export let practiceState: PracticeState = $session.loggedIn ? "options" : "loading"
 
     let setData: PracticeSet = null
     let error: string = null
@@ -53,10 +53,12 @@
 
 
     onMount(() => {
-        if (localStorage.getItem('dontShowLoginPrompt') === 'true') {
-            practiceState = "options"
-        } else {
-            practiceState = "login-prompt"
+        if (!$session.loggedIn) {
+            if (localStorage.getItem('dontShowLoginPrompt') === 'true') {
+                practiceState = "options"
+            } else {
+                practiceState = "login-prompt"
+            }
         }
     })
 
@@ -172,7 +174,7 @@
     }
 </script>
 
-<main>
+<main class:practicing={practiceState === "practicing"}>
     {#if practiceState === "loading"}
         <div></div>
     {:else if practiceState === "login-prompt"}
@@ -215,5 +217,9 @@
         display: grid;
         place-content: center;
         position: relative;
+    }
+
+    .practicing {
+        margin-bottom: 80px;
     }
 </style>

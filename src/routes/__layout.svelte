@@ -7,7 +7,7 @@
 
 <svelte:window bind:innerWidth={windowWidth} />
 
-{#if windowWidth > 700}
+{#if windowWidth > 730}
     <Navbar />
 {:else}
     <NavbarMobile />

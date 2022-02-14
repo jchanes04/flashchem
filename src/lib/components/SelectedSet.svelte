@@ -62,4 +62,10 @@
         margin-bottom: 0.75em;
         // margin-left: 1.5em;
     }
+
+    @media (max-width: 650px) {
+        .set-preview {
+            margin-left: 0;
+        }
+    }
 </style>

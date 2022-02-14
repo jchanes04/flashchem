@@ -155,4 +155,37 @@
             background-color: var(--button-1-hover);
         }
     }
+
+    @media (max-width: 650px) {
+        .list-practice {
+            padding: 1.5em 1em;
+        }
+
+        input {
+            font-size: 20px;
+        }
+
+        .large {
+            font-size: 48px;
+            margin-bottom: 0.5em;
+        }
+    } 
+
+    @media (max-height: 620px) {
+        .list-practice {
+            padding: 1em;
+        }
+
+        p {
+            margin-bottom: 0.2em;
+        }
+
+        .large {
+            font-size: 48px;
+        }
+
+        input {
+            font-size: 20px;
+        }
+    }
 </style>

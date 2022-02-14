@@ -1,7 +1,6 @@
 <script lang="ts">
-    import type { PracticeStatistic } from "$lib/client";
     import practiceOptions from "$lib/stores/practiceOptions";
-import practiceStats from "$lib/stores/practiceStats";
+    import practiceStats from "$lib/stores/practiceStats";
     import { createEventDispatcher } from "svelte";
     import LastQuestion from "./LastQuestion.svelte";
 
@@ -53,6 +52,7 @@ import practiceStats from "$lib/stores/practiceStats";
         max-height: 70vh;
         overflow-y: auto;
         overflow-x: hidden;
+        box-sizing: border-box;
     }
 
     h1 {
@@ -69,9 +69,9 @@ import practiceStats from "$lib/stores/practiceStats";
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        align-items: center;
-        margin-right: -1px;
-        margin-bottom: -1px;
+        align-items: stretch;
+        margin-right: -2px;
+        margin-bottom: -2px;
 
         > * {
             min-width: 200px;
@@ -117,6 +117,34 @@ import practiceStats from "$lib/stores/practiceStats";
 
         &:hover {
             background-color: var(--button-1-hover);
+        }
+    }
+
+    @media (max-width: 650px) {
+        .practice-results {
+            width: 90vw;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .scores > * {
+            min-width: 125px;
+        }
+
+        .score {
+            font-size: 56px;
+        }
+
+        .units {
+            font-size: 16px;
+        }
+
+        button {
+            width: min(100%, 20ch);
+            margin-left: 0;
+            margin-right: 0;
         }
     }
 </style>

@@ -6,11 +6,13 @@
     import PeriodicTableElement from "./PeriodicTableElement.svelte";
 
     export let showFBlock = false
-    export let defaultFontSize = window.innerWidth / 50
+    export let defaultFontSize = 14.122 * Math.pow(Math.E, window.innerWidth / 1616.844) - 7.48178
+    export let delay = 500
 
     const dispatch = createEventDispatcher()
 
     let ptableFontSize = defaultFontSize
+    $: console.log(ptableFontSize)
     let elementsShown = showFBlock
         ? elements
         : [...elements.slice(0, 56), ...elements.slice(71, 88), ...elements.slice(103)]
@@ -24,7 +26,7 @@
                 clickDisabled = true
                 setTimeout(() => {
                     clickDisabled = false
-                }, 500)
+                }, delay)
             }
         }
     }
@@ -59,7 +61,7 @@
         mousePos = null
         setTimeout(() => {
             dragging = false
-        }, 50)
+        }, 20)
 
         inputWrapperElement.removeEventListener('mousemove', handleMousemove)
         window.removeEventListener('mouseup', handleMouseup)
@@ -75,7 +77,7 @@
         bind:this={inputWrapperElement} class:dragging on:mousedown={handleMousedown}>
         <div class="periodic-table-input" class:f-block={showFBlock}>
             {#each elementsShown as e}
-                <PeriodicTableElement {...e} on:click={createAnswerHandler(e)} {clickDisabled} {dragging} />
+                <PeriodicTableElement {...e} on:click={createAnswerHandler(e)} {clickDisabled} {dragging} {delay} />
             {/each}
         </div>
     </div>
@@ -89,6 +91,8 @@
     .outer-wrapper {
         max-width: 100vw;
         overflow: hidden;
+        position: relative;
+        margin: 0 min(10%, 3em);
     }
 
     .input-wrapper {
@@ -138,6 +142,18 @@
         :last-child {
             border-top-right-radius: 5px;
             border-bottom-right-radius: 5px;
+        }
+    }
+
+    @media (max-width: 650px) {
+        .buttons button {
+            font-size: 1.5em;
+        }
+    }
+
+    @media (max-height: 620px) {
+        .outer-wrapper {
+            margin: 0;
         }
     }
 </style>
