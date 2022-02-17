@@ -7,7 +7,6 @@
 
     export let showFBlock = false
     export let defaultFontSize = 14.122 * Math.pow(Math.E, window.innerWidth / 1616.844) - 7.48178
-    export let delay = 500
 
     const dispatch = createEventDispatcher()
 
@@ -18,15 +17,15 @@
         : [...elements.slice(0, 56), ...elements.slice(71, 88), ...elements.slice(103)]
 
     let clickDisabled = false
+    let selectedElement: string = null
+
+    let lastWindowDimensions: [number, number] = [window.innerWidth, window.innerHeight]
 
     function createAnswerHandler(e: PtableElementInfo) {
         return () => {
             if (!clickDisabled && !dragging) {
                 dispatch('answer', { selectedElement: e.atomicNumber })
-                clickDisabled = true
-                setTimeout(() => {
-                    clickDisabled = false
-                }, delay)
+                selectedElement = e.atomicNumber
             }
         }
     }
@@ -70,14 +69,30 @@
     function getDist(p1: Position, p2: Position) {
         return Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
     }
+
+    function handleResize() {
+        ptableFontSize *= (window.innerWidth + window.innerHeight)/(lastWindowDimensions[0] + lastWindowDimensions[1])
+        lastWindowDimensions = [window.innerWidth, window.innerHeight]
+    }
+
+    export function triggerDelay() {
+        console.log('d')
+        clickDisabled = true
+        setTimeout(() => {
+            clickDisabled = false
+            selectedElement = null
+        }, 1000)
+    }
 </script>
+
+<svelte:window on:resize={handleResize}></svelte:window>
 
 <div class="outer-wrapper">
     <div class="input-wrapper" style="--ptable-font-size: {ptableFontSize}px"
         bind:this={inputWrapperElement} class:dragging on:mousedown={handleMousedown}>
         <div class="periodic-table-input" class:f-block={showFBlock}>
             {#each elementsShown as e}
-                <PeriodicTableElement {...e} on:click={createAnswerHandler(e)} {clickDisabled} {dragging} {delay} />
+                <PeriodicTableElement {...e} on:click={createAnswerHandler(e)} {dragging} {clickDisabled} selected={selectedElement === e.atomicNumber && clickDisabled} />
             {/each}
         </div>
     </div>
@@ -93,6 +108,7 @@
         overflow: hidden;
         position: relative;
         margin: 0 min(10%, 3em);
+        user-select: none;
     }
 
     .input-wrapper {
@@ -122,7 +138,7 @@
     .buttons {
         position: absolute;
         top: 5px;
-        right: 5px;
+        right: 18px;
         font-weight: bold;
 
         button {

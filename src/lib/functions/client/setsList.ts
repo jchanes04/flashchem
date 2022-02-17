@@ -30,7 +30,12 @@ export function setsList(): SetInfo[] {
             type: 'place',
             name: 'Periodic Table Locations - Starter',
             description: 'Contains the first 18 elements and where they are located on the periodic table. This is a good first set to learn for beginners.',
-            id: 'S3'
+            id: 'S3',
+            etc: {
+                hideAtomicNumber: true,
+                hideAtomicSymbol: true,
+                hideAtomicMass: true
+            }
         },
         {
             difficulty: 'starter',

@@ -4,19 +4,15 @@
 
     import type { SetItem } from "$lib/global";
     import { createEventDispatcher, onMount, tick } from "svelte";
+    import type { SvelteComponentTyped } from "svelte/internal";
     import PeriodicTableInput from "../PeriodicTableInput.svelte";
 
     export let currentQuestion: SetItem
     export let showSkip: boolean
 
-    let streak = 0
     let skipDisabled = false
-    let lastClickTime = Number.MAX_SAFE_INTEGER
-    $: delay = calculateDelay(streak)
 
-    function calculateDelay(s: number) {
-        return (Date.now() - lastClickTime < 4 * delay * Math.pow(1.05, s / 250) + 300) ? 500 * Math.pow(0.7, Math.sqrt(s / 1.2)) : 500
-    }
+    let pTableInputComponent: SvelteComponentTyped
 
     const dispatch = createEventDispatcher()
 
@@ -24,14 +20,9 @@
         const { selectedElement } = e.detail
         if (selectedElement === currentQuestion.value) {
             dispatch('correct')
-            streak = (Date.now() - lastClickTime < 2 * delay * Math.pow(1.05, streak / 250) + 300) ? streak + 1 : 0
             await tick()
-            lastClickTime = Date.now()
         } else {
-            streak = 0
-            delay = 500
             await tick()
-            lastClickTime = Date.now()
             dispatch('incorrect', {
                 lastQuestion: {
                     key: currentQuestion.key,
@@ -39,6 +30,7 @@
                     correctAnswer: currentQuestion.value
                 } as LastQuestionData
             })
+            pTableInputComponent.triggerDelay()
         }
     }
 
@@ -46,7 +38,7 @@
         skipDisabled = true
         setTimeout(() => {
             skipDisabled = false
-        }, 1000)
+        }, 2000)
         dispatch('skip')
     }
 </script>
@@ -58,7 +50,7 @@
             <p class="skip" class:disabled={skipDisabled} on:click={handleSkip}>Skip question</p>
         {/if}
     </div>
-    <PeriodicTableInput on:answer={handleAnswer} {delay} />
+    <PeriodicTableInput on:answer={handleAnswer} bind:this={pTableInputComponent} />
 </div>
 
 <style lang="scss">
@@ -137,7 +129,7 @@
         }
     }
 
-    @media (max-height: 620px) {
+    @media (min-aspect-ratio: 3/2) and (max-height: 600px) {
         .place-practice {
             margin: 1em 2em 0;
             grid-template-columns: auto 1fr;
@@ -155,12 +147,6 @@
             min-width: 25vw;
             max-width: 40vw;
             box-sizing: border-box;
-        }
-    }
-
-    @media (max-width: 950px) and (max-height: 620px) {
-        .place-practice {
-            height: calc(100% - 1.5em);
         }
     }
 </style>

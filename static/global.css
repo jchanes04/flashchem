@@ -24,3 +24,23 @@ a {
     color: inherit;
     text-decoration: none;
 }
+
+*::-webkit-scrollbar {
+    width: 15px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    width: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-track {
+    margin: 0.5em 0;
+}
+
+*::-webkit-scrollbar-corner {
+    display: none;
+}

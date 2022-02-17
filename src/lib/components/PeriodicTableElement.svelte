@@ -1,4 +1,6 @@
 <script lang="ts">
+    import practiceOptions from "$lib/stores/practiceOptions";
+
     import { createEventDispatcher } from "svelte";
 
     export let atomicNumber: string
@@ -6,39 +8,23 @@
     export let atomicMass: string
     export let gridX: number
     export let gridY: number
-    export let clickDisabled = false
     export let dragging = false
-    export let delay
-    export let options: {
-        hideAtomicNumber: boolean,
-        hideSymbol: boolean,
-        hideAtomicMass: boolean
-    } = {
-        hideAtomicNumber: false,
-        hideSymbol: false,
-        hideAtomicMass: false
-    }
+    export let clickDisabled = false
 
-    let selected = false
+    export let selected = false
 
     const dispatch = createEventDispatcher()
 
     function handleClick() {
         dispatch('click')
-        if (!clickDisabled && !dragging) {
-            selected = true
-            setTimeout(() => {
-                selected = false
-            }, delay)
-        }
     }
 </script>
 
 <div class="ptable-element" class:dragging style="grid-column-start: {gridX}; grid-row-start: {gridY}"
-    on:click={handleClick} class:selected>
-    <p class="atomic-number" class:hidden={options.hideAtomicNumber}>{atomicNumber}</p>
-    <p class="atomic-symbol" class:hidden={options.hideSymbol}>{symbol}</p>
-    <p class="atomic-mass" class:hidden={options.hideAtomicMass}>{atomicMass}</p>
+    on:click={handleClick} class:selected class:clickDisabled>
+    <p class="atomic-number" class:hidden={$practiceOptions.selectedSet.etc?.hideAtomicNumber ?? true}>{atomicNumber}</p>
+    <p class="atomic-symbol" class:hidden={$practiceOptions.selectedSet.etc?.hideAtomicSymbol ?? true}>{symbol}</p>
+    <p class="atomic-mass" class:hidden={$practiceOptions.selectedSet.etc?.hideAtomicMass ?? true}>{atomicMass}</p>
 </div>
 
 <style lang="scss">
@@ -57,7 +43,7 @@
         background-color: rgba(255,255, 255, 0.1);
 
         &.selected {
-            background-color: transparentize(#B83D49, 0.6);
+            background-color: transparentize(#B83D49, 0.3);
 
             .atomic-symbol {
                 color: #51B6F5; 
@@ -70,24 +56,24 @@
     }
 
     .atomic-number {
-        font-size: 0.625em;
-        margin: 0.2em 0 0;
+        font-size: 0.5em;
+        margin: 0.15em 0 0;
     }
 
     .atomic-symbol {
         font-size: 1.125em;
-        margin: 0.1em 0;
+        margin: 0 0 0.1em;
         color: #FF9B54;
         line-height: 1em;
     }
 
     .atomic-mass {
-        font-size: 0.5em;
-        margin: 0.1em 0;
+        font-size: 0.375em;
+        margin: 0.075em 0;
     }
 
     .selected {
-        background-color: transparentize(#B83D49, 0.6);
+        background-color: transparentize(#B83D49, 0.3);
         
         .atomic-symbol {
             color: #51B6F5;
@@ -96,5 +82,9 @@
 
     .hidden {
         visibility: hidden;
+    }
+
+    .clickDisabled:not(.selected) > * {
+        opacity: 0.6;
     }
 </style>
