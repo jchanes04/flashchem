@@ -11,8 +11,8 @@
     let practiceLength = 1
 
     const timingInterval = setInterval(() => {
-        practiceLength++
-    }, 1000)
+        practiceLength += 0.1
+    }, 100)
 
     $: if ($practiceStats.questionNumber > totalQuestions) {
         clearInterval(timingInterval)
