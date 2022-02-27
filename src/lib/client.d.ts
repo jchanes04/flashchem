@@ -1,11 +1,11 @@
-import type { Difficulty, PracticeSet, SetItem, Topic, Type, Optional } from "./global"
+import type { Difficulty, PracticeSet, SetItem, Topic, Type, Optional, SetType } from "./global"
 
-export type SetInfo = Optional<Omit<PracticeSet, 'items'>, 'createdAt' | 'updatedAt'>
+export type SetInfo<T extends SetType = SetType> = Omit<PracticeSet<T>, 'items' | 'createdAt' | 'updatedAt'>
 
 export type PracticeState = "loading" | "login-prompt" | "options" | "error" | "practicing" | "results"
 
 export type PracticeOptions = {
-    selectedSet: SetInfo & { isGroupItem: boolean },
+    selectedSet: SetInfo,
     practiceMode: PracticeMode,
     practiceTime?: number,
     practiceQuestions?: number,
@@ -36,7 +36,7 @@ export type PracticeStatistic = {
 }
 
 export type LastQuestionData = {
-    key: string | number,
+    prompt: string | number,
     correctAnswer: string | number,
     givenAnswer: string | number
 }

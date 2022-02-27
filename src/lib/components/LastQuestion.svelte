@@ -4,15 +4,15 @@
 
     export let lastQuestion: LastQuestionData
 
-    $: keyClass = getTextSizeClass(lastQuestion.key.toString())
+    $: keyClass = getTextSizeClass(lastQuestion.prompt.toString())
     $: givenAnswerClass = getTextSizeClass(lastQuestion.givenAnswer.toString())
     $: correctAnswerClass = getTextSizeClass(lastQuestion.correctAnswer.toString())
 </script>
 
 <div class="last-question">
     <div class="key">
-        <h2>Key: </h2>
-        <p class={keyClass}>{lastQuestion.key}</p>
+        <h2>Prompt: </h2>
+        <p class={keyClass}>{lastQuestion.prompt}</p>
     </div>
     <div class="answers">
         <div>

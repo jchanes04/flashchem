@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { LastQuestionData } from "$lib/client";
+    import type { LastQuestionData, SetInfo } from "$lib/client";
     import getTextSizeClass from "$lib/functions/client/getTextSizeClass";
 
     import type { SetItem } from "$lib/global";
@@ -9,6 +9,8 @@
     export let currentQuestion: SetItem
     export let showSkip: boolean
     export let showNext: boolean
+
+    $: selectedSet = $practiceOptions.selectedSet as SetInfo<"list">
 
     let skipDisabled = false
 
@@ -22,14 +24,14 @@
 
     onMount(() => {
         inputElement.focus()
-        console.dir($practiceOptions.selectedSet)
+        console.dir(selectedSet)
     })
 
     function handleInput() {
-        if (!showNext && inputtedValue === currentQuestion.value) {
+        if (!showNext && inputtedValue === currentQuestion.answer) {
             dispatch('correct')
             inputtedValue = ""
-        } else if ($practiceOptions.selectedSet.etc?.inputType === "number") {
+        } else if (selectedSet.options.inputType === "number") {
             if (numberRegex.test(inputtedValue)) {
                 lastValue = inputtedValue
             } else {
@@ -39,15 +41,15 @@
     }
 
     function handleNext() {
-        if (inputtedValue === currentQuestion.value) {
+        if (inputtedValue === currentQuestion.answer) {
             dispatch('correct')
             inputtedValue = ""
         } else {
             dispatch('incorrect', {
                 lastQuestion: {
-                    key: currentQuestion.key,
+                    prompt: currentQuestion.prompt,
                     givenAnswer: inputtedValue,
-                    correctAnswer: currentQuestion.value
+                    correctAnswer: currentQuestion.answer
                 } as LastQuestionData
             })
             inputtedValue = ""
@@ -70,7 +72,7 @@
 </script>
 
 <div class="list-practice">
-    <p class={getTextSizeClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
+    <p class={getTextSizeClass(currentQuestion.prompt.toString())}>{currentQuestion.prompt}</p>
     <div class="input-container">
         <input type="text" bind:this={inputElement} bind:value={inputtedValue} on:input={handleInput} on:keydown={handleKeydown} />
         {#if showNext}

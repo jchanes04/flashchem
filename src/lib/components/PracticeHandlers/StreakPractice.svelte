@@ -22,11 +22,5 @@
 </div>
 
 <style lang="scss">
-    .streak-practice {
-        background: var(--background-3);
-        border-radius: 15px;
-        padding: 2.5em;
-        color: var(--text-light);
-        width: min(700px, 80vw);
-    }
+    
 </style>

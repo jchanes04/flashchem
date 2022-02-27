@@ -1,4 +1,6 @@
 <script lang="ts">
+import type { SetInfo } from "$lib/client";
+
     import practiceOptions from "$lib/stores/practiceOptions";
 
     import { createEventDispatcher } from "svelte";
@@ -13,6 +15,8 @@
 
     export let selected = false
 
+    $: selectedSet = $practiceOptions.selectedSet as SetInfo<"place">
+
     const dispatch = createEventDispatcher()
 
     function handleClick() {
@@ -22,9 +26,9 @@
 
 <div class="ptable-element" class:dragging style="grid-column-start: {gridX}; grid-row-start: {gridY}"
     on:click={handleClick} class:selected class:clickDisabled>
-    <p class="atomic-number" class:hidden={$practiceOptions.selectedSet.etc?.hideAtomicNumber ?? true}>{atomicNumber}</p>
-    <p class="atomic-symbol" class:hidden={$practiceOptions.selectedSet.etc?.hideAtomicSymbol ?? true}>{symbol}</p>
-    <p class="atomic-mass" class:hidden={$practiceOptions.selectedSet.etc?.hideAtomicMass ?? true}>{atomicMass}</p>
+    <p class="atomic-number" class:hidden={selectedSet.options.hideAtomicNumber ?? true}>{atomicNumber}</p>
+    <p class="atomic-symbol" class:hidden={selectedSet.options.hideAtomicSymbol ?? true}>{symbol}</p>
+    <p class="atomic-mass" class:hidden={selectedSet.options.hideAtomicMass ?? true}>{atomicMass}</p>
 </div>
 
 <style lang="scss">

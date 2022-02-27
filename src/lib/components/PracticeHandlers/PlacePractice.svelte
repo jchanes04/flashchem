@@ -1,8 +1,9 @@
 <script lang="ts">
-    import type { LastQuestionData } from "$lib/client";
+    import type { LastQuestionData, SetInfo } from "$lib/client";
     import getTextSizeClass from "$lib/functions/client/getTextSizeClass";
 
     import type { SetItem } from "$lib/global";
+    import practiceOptions from "$lib/stores/practiceOptions";
     import { createEventDispatcher, onMount, tick } from "svelte";
     import type { SvelteComponentTyped } from "svelte/internal";
     import PeriodicTableInput from "../PeriodicTableInput.svelte";
@@ -10,24 +11,26 @@
     export let currentQuestion: SetItem
     export let showSkip: boolean
 
+    $: selectedSet = $practiceOptions.selectedSet as SetInfo<"place">
+
     let skipDisabled = false
 
     let pTableInputComponent: SvelteComponentTyped
 
     const dispatch = createEventDispatcher()
 
-    async function handleAnswer(e: CustomEvent<{ selectedElement: number }>) {
+    async function handleAnswer(e: CustomEvent<{ selectedElement: string }>) {
         const { selectedElement } = e.detail
-        if (selectedElement === currentQuestion.value) {
+        if (selectedElement === currentQuestion.answer) {
             dispatch('correct')
             await tick()
         } else {
             await tick()
             dispatch('incorrect', {
                 lastQuestion: {
-                    key: currentQuestion.key,
+                    prompt: currentQuestion.prompt,
                     givenAnswer: selectedElement,
-                    correctAnswer: currentQuestion.value
+                    correctAnswer: currentQuestion.answer
                 } as LastQuestionData
             })
             pTableInputComponent.triggerDelay()
@@ -45,12 +48,12 @@
 
 <div class="place-practice">
     <div class="question">
-        <p class={getTextSizeClass(currentQuestion.key.toString())}>{currentQuestion.key}</p>
+        <p class={getTextSizeClass(currentQuestion.prompt.toString())}>{currentQuestion.prompt}</p>
         {#if showSkip}
             <p class="skip" class:disabled={skipDisabled} on:click={handleSkip}>Skip question</p>
         {/if}
     </div>
-    <PeriodicTableInput on:answer={handleAnswer} bind:this={pTableInputComponent} />
+    <PeriodicTableInput on:answer={handleAnswer} bind:this={pTableInputComponent} showFBlock={selectedSet.options.showFBlock} />
 </div>
 
 <style lang="scss">

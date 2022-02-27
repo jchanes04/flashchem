@@ -1,6 +1,6 @@
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-export type Difficulty = "starter" | "basic" | "intermediate" | "advanced" | "complete"
+export type Difficulty = "basic" | "intermediate" | "advanced" | "comprehensive"
 export type Topic = 
     "atomic numbers" |
     "atomic masses" |
@@ -16,21 +16,44 @@ export type PracticeLength<T> = T extends "timed"
 
 export type LeaderboardName<T extends PracticeMode> = `${T}-${PracticeLength<T>}`
 
-export type SetType = "list" | "name" | "place" | "compare"
+export type SetType = "list" | "place" | "compare" | "order"
 
-export type SetItem = { key: string | number, value: string | number, i: number }
+export type SetItem = { prompt: string, answer: string, i: number }
 
-export type PracticeSet = {
+export type PracticeSet<T extends SetType = SetType> = {
     id: string,
     name: string,
     difficulty: Difficulty,
     topic: Topic,
-    type: SetType,
+    type: T,
     description: string,
-    etc?: Record<string, any>
+    options: SetOptions<T>
     items: SetItem[],
     createdAt: Date,
     updatedAt: Date
+}
+
+type SetOptions<T extends SetType> = T extends "list"
+    ? ListOptions
+    : T extends "place"
+        ? PlaceOptions
+        : T extends "compare"
+            ? CompareOptions
+            : CompareOptions
+
+type ListOptions = {
+    inputType: "number" | "text" | "chemical-formula" | "chemical-equation" | "element-symbol"
+}
+
+type PlaceOptions = {
+    hideAtomicNumber: boolean,
+    hideAtomicSymbol: boolean,
+    hideAtomicMass: boolean,
+    showFBlock: boolean
+}
+
+type CompareOptions = {
+
 }
 
 export type UserScore = {
