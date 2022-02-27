@@ -7,11 +7,10 @@ import env from '$lib/env'
 
 const privateKey = fs.readFileSync('jwt.key')
 
-
 export const oauth2client = new google.auth.OAuth2(
     env.GOOGLE_CLIENT_ID,
     env.GOOGLE_CLIENT_SECRET,
-    env.VITE_HOST_URL + "/callback/google"
+    import.meta.env.VITE_HOST_URL + "/callback/google"
 )
 
 export const authUrl = oauth2client.generateAuthUrl({

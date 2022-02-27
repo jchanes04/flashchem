@@ -21,7 +21,7 @@ export async function get({ url }: RequestEvent) {
             return {
                 status: 302,
                 headers: {
-                    'Location': 'https://localhost:3000/account',
+                    'Location': import.meta.env.VITE_HOST_URL + '/account',
                     'Set-Cookie': `authToken=${token};Path=/;HttpOnly;`
                 }
             }
@@ -31,7 +31,7 @@ export async function get({ url }: RequestEvent) {
             return {
                 status: 302,
                 headers: {
-                    'Location': `https://localhost:3000/signup?hash=${encodeURIComponent(hash)}`
+                    'Location': import.meta.env.VITE_HOST_URL + `/signup?hash=${encodeURIComponent(hash)}`
                 }
             }
         }
