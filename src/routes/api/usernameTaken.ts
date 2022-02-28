@@ -1,7 +1,7 @@
-import type { RequestEvent } from "@sveltejs/kit";
 import { usernameTaken } from "$lib/mongo";
 
-export async function get({ url }: RequestEvent) {
+/** @type {import('@sveltejs/kit').RequestHandler} */
+export async function get({ url }) {
     let username = url.searchParams.get('username')
 
     if (username) {

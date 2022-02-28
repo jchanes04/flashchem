@@ -1,9 +1,9 @@
 import { generateSignupHash, generateToken, oauth2client } from "$lib/auth";
-import type { RequestEvent } from "@sveltejs/kit";
 import type { oauth2_v2 } from "googleapis";
 import { getUserData } from "$lib/mongo";
 
-export async function get({ url }: RequestEvent) {
+/** @type {import('@sveltejs/kit').RequestHandler} */
+export async function get({ url }) {
     let code = url.searchParams.get('code')
     if (code) {
         const { tokens } = await oauth2client.getToken(code)

@@ -1,3 +1,18 @@
+<script context="module" lang="ts">
+    import type { LoadInput, LoadOutput } from "@sveltejs/kit";
+
+    export async function load({ session }: LoadInput): Promise<LoadOutput> {
+        if (session.loggedIn) {
+            return {}
+        } else {
+            return {
+                status: 302,
+                redirect: '/auth/google'
+            }
+        }
+    }
+</script>
+
 <script lang="ts">
     import { session } from "$app/stores";
     import AccountInfo from "$lib/components/AccountInfo.svelte";

@@ -1,5 +1,4 @@
 import type { Optional, UserScore } from "$lib/global";
-import type { RequestEvent } from "@sveltejs/kit";
 import { getUserFromToken } from "$lib/auth";
 import { addNewScore } from "$lib/mongo";
 import jwt from 'jsonwebtoken'
@@ -7,7 +6,8 @@ import fs from 'fs'
 
 const privateKey = fs.readFileSync('jwt.key')
 
-export async function post({ request }: RequestEvent) {
+/** @type {import('@sveltejs/kit').RequestHandler} */
+export async function post({ request }) {
     const body: Optional<UserScore, "createdAt" | "hash"> = await request.json()
 
     const authorizedUser = await getUserFromToken(request.headers.get('authorization'))

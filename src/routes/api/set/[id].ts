@@ -1,7 +1,7 @@
-import type { RequestEvent } from "@sveltejs/kit";
 import { getSetById } from "$lib/mongo";
 
-export async function get({ params }: RequestEvent) {
+/** @type {import('@sveltejs/kit').RequestHandler} */
+export async function get({ params }) {
     const { id } = params
     const practiceSet = await getSetById(id)
     if (!practiceSet) return {
