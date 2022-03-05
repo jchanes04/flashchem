@@ -58,7 +58,7 @@
         practiceQuestions = value
     }
 
-    let postScore = true
+    let postScore = $session.userData?.settings.submitScoresByDefault
 
     $: startDisabled = !(selectedSet && practiceMode && (practiceTime || practiceQuestions))
     $: scoreboardEnabled = practiceMode === "timed"

@@ -1,106 +1,63 @@
 <script lang="ts">
+import { signupError } from '$lib/functions/client/getErrorMessage';
+                                      
+    import { usernameNotTaken } from '$lib/functions/client/usernameNotTaken';
+
     export let hash: string
 
     import { afterUpdate, onMount } from 'svelte';
-    import { form as customForm } from 'svelte-forms'
+    import { field, form as createForm } from 'svelte-forms'
+    import { max, min, required } from 'svelte-forms/validators';
 
-    let username = ""
-    let purpose = "N/A"
-
-    const usernameNotTaken = async value => fetch(`/api/usernameTaken?username=${encodeURIComponent(value)}`, {
-        credentials: 'include'
-    })
-    .then(d => d.json())
-    .then(d => {
-        console.log(d);
-        return {
-            name: "usernameIsNotTaken",
-            valid: !d.taken
-        }
-    })
-
-    $: {
-        checked = !!$signupForm?.fields.username
-    }
+    const username = field('username', '', [
+        required(),
+        min(6),
+        max(30),
+        usernameNotTaken
+    ])
+    const purpose = field('purpose', 'N/A', [
+        required()
+    ])
 
     let checked = false
-    let signupForm: customForm
-    onMount(() => {
-        signupForm = customForm(
-            () => ({
-                username: {
-                    value: username,
-                    validators: ["required", "min:6", "max:30", usernameNotTaken]
-                },
-                purpose: {
-                    value: purpose,
-                    enabled: false
-                }
-            }),
-            {
-                validateOnChange: false
-            }
-        )
-    })
-
-    afterUpdate(() => {
-        if (!checked) signupForm.validate()
-    })
+    let form = createForm(username, purpose)
 </script>
 
 <form method="POST" action="/signup" autocomplete="off" on:input={() => checked = false}>
     <div class="field text">
         <label for="username-input">Username</label>
-        <input id="username-input" type="text" name="username" bind:value={username} />
+        <input id="username-input" type="text" name="username" bind:value={$username.value} />
     </div>
     <div class="field radio" id="radio">
         <h2>Why have you decided to use FlashChem?</h2>
         <input type="hidden" name="hash" value={hash} />
-        <input type="radio" name="purpose" value="N/A" bind:group={purpose} style="display: none;" checked />
+        <input type="radio" name="purpose" value="N/A" bind:group={$purpose.value} style="display: none;" checked />
         <label for="high-school-class-input">
-            <input id="high-school-class-input" type="radio" name="purpose" value="high-school" bind:group={purpose} />
+            <input id="high-school-class-input" type="radio" name="purpose" value="high-school" bind:group={$purpose.value} />
             <span />
             To study for a High School level class
         </label>
         <label for="college-level-class-input">
-            <input id="college-level-class-input" type="radio" name="purpose" value="college" bind:group={purpose} />
+            <input id="college-level-class-input" type="radio" name="purpose" value="college" bind:group={$purpose.value} />
             <span />
             To study for a College level class
         </label>
         <label for="competition-input">
-            <input id="competition-input" type="radio" name="purpose" value="competition" bind:group={purpose} />
+            <input id="competition-input" type="radio" name="purpose" value="competition" bind:group={$purpose.value} />
             <span />
             To study for a competition like USNCO
         </label>
         <label for="personal-input">
-            <input id="personal-input" type="radio" name="purpose" value="personal" bind:group={purpose} />
+            <input id="personal-input" type="radio" name="purpose" value="personal" bind:group={$purpose.value} />
             <span />
             To study for myself or for another purpose
         </label>
     </div>
-    <div class="errors">
-        {#if $signupForm?.fields.username.errors.includes('required')}
-            <p>A username is required</p>
-        {/if}
-
-        {#if $signupForm?.fields.username.errors.includes('min')}
-            <p>Usernames must be a minimum of 6 characters</p>
-        {/if}
-
-        {#if $signupForm?.fields.username.errors.includes('max')}
-            <p>Usernames must be at most 30 characters</p>
-        {/if}
-
-        {#if $signupForm?.fields.username.pending}
-            <p>Checking username availability...</p>
-        {/if}
-
-        {#if $signupForm?.fields.username.errors.includes('usernameIsNotTaken')}
-            <p>That username is already taken</p>
-        {/if}
-    </div>
+    {#if $form.errors[0]}
+        <p class="error">{signupError($form.errors[0])}</p>
+    {/if}
     <div class="button">
-        <button disabled={!$signupForm?.valid}>
+        <button disabled={!!$form.errors[0]}>
             Create Account
         </button>
     </div>
@@ -180,9 +137,8 @@
         }
     }
 
-    .errors {
-        margin-top: 1.5em;
-        text-align: right;
+    .error {
+        margin-top: 1em;
         color: var(--background-2);
     }
 

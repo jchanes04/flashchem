@@ -1,7 +1,9 @@
 /// <reference types="@sveltejs/kit" />
 
 declare namespace App {
-    interface Locals {}
+    interface Locals {
+        userData?: import('$lib/global').UserData
+    }
 
     interface Platform {}
 

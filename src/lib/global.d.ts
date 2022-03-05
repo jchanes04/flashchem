@@ -67,5 +67,11 @@ export type UserScore = {
 
 export type UserData = {
     username: string,
-    userId: string
+    userId: string,
+    settings: UserSettings
+}
+
+export type UserSettings = {
+    profileVisibility: 'public' | 'private',
+    submitScoresByDefault: boolean
 }

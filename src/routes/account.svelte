@@ -1,8 +1,10 @@
 <script context="module" lang="ts">
-    import type { LoadInput, LoadOutput } from "@sveltejs/kit";
+    import type { LoadInput, LoadOutput } from "@sveltejs/kit/types/internal";
 
-    export async function load({ session }: LoadInput): Promise<LoadOutput> {
-        if (session.loggedIn) {
+    export async function load({ session, fetch }: LoadInput): Promise<LoadOutput> {
+        const res = await fetch('/api/settings')
+        if (session.loggedIn && res.status === 200) {
+            session.userData.settings = await res.json()
             return {}
         } else {
             return {
@@ -15,7 +17,7 @@
 
 <script lang="ts">
     import { session } from "$app/stores";
-    import AccountInfo from "$lib/components/AccountInfo.svelte";
+    import AccountInfo from "$lib/components/AccountSettings.svelte";
     import { onMount } from "svelte";
 
     onMount(() => {
@@ -24,8 +26,11 @@
 </script>
 
 <main>
-    <div class="pfp"></div>
-    <AccountInfo userData={$session.userData} />
+    <div class="profile">
+        <div class="pfp"></div>
+        <h2 class="username">{$session.userData.username}</h2>
+    </div>
+    <AccountInfo />
     <div class="scoreboard"></div>
 </main>
 
@@ -37,11 +42,20 @@
         grid-template-columns: min(300px, 30vw) auto;
         grid-template-rows: auto auto;
         grid-template-areas:
-            "pfp info"
+            "profile settings"
             "scoreboard scoreboard";
         gap: 40px;
         margin: auto;
         margin-top: 50px;
+    }
+
+    .username {
+        color: var(--text-light)
+    }
+
+    .profile {
+        grid-area: profile;
+        place-self: center;
     }
 
     .pfp {
@@ -49,8 +63,6 @@
         height: min(250px, 25vw);
         background: #C4C4C4;
         border-radius: 50%;
-        grid-area: pfp;
-        place-self: center;
     }
 
     .scoreboard {
@@ -74,9 +86,9 @@
             grid-template-columns: 1fr;
             grid-template-rows: auto auto auto;
             grid-template-areas: 
-                "pfp"
-                "info"
-                "scoreboard";
+                "profile"
+                "scoreboard"
+                "settings";
         }
 
         .pfp {

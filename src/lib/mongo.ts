@@ -1,12 +1,11 @@
-import type { UserBase } from '$lib/server';
 import { Collection, Db, MongoClient, Document, FindCursor } from 'mongodb'
-import type { PracticeSet, UserData, UserScore } from '$lib/global';
+import type { PracticeSet, UserData, UserScore, UserSettings } from '$lib/global';
 import env from '$lib/env';
 
 
 let client = new MongoClient(env.DATABASE_URL)
 let db: Db;
-let userData: Collection;
+let userData: Collection<UserData>;
 let practiceSets: Collection<PracticeSet>;
 let userScores: Collection<UserScore>;
 export async function init() {
@@ -47,7 +46,7 @@ export const usernameTaken = queryWrapper(async (username: string) => {
     return !!(await userData.findOne({ username }))
 })
 
-export const addNewUser = queryWrapper(async (user: UserBase) => {
+export const addNewUser = queryWrapper(async (user: UserData) => {
     return userData.insertOne(user)
 })
 
@@ -73,6 +72,20 @@ export const getScoresByUser = queryWrapper(async (userId: string) => {
 
 export const addNewScore = queryWrapper(async (scoreData: UserScore) => {
     return userScores.insertOne(scoreData)
+})
+
+export const updateProfile = queryWrapper(async (userId: string, profileData: Partial<{
+    username: string
+}>, settings: Partial<UserSettings>) => {
+    const currentProfile = await userData.findOne({ userId })
+    return userData.updateOne({ userId }, { $set: {
+        ...currentProfile,
+        ...profileData,
+        settings: {
+            ...currentProfile.settings,
+            ...settings
+        }
+    } })
 })
 
 async function remove_id<T>(document: Document | Promise<Document>): Promise<T> {
